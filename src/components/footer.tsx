@@ -10,8 +10,7 @@ export function Footer() {
         <div className="grid md:grid-cols-2 gap-8">
           <div className="flex flex-col gap-4">
             <Link href="/" className="flex items-center space-x-2">
-              <DevFestLogo className="h-6 w-6" />
-              <span className="font-bold">DevFest Vizag 2025</span>
+              <DevFestLogo className="h-6 w-32" />
             </Link>
             <p className="text-sm text-muted-foreground max-w-sm">
               The biggest developer conference in Visakhapatnam, brought to you by the community, for the community.

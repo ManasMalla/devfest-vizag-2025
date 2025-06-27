@@ -29,8 +29,8 @@ export function DevFestLogo(props: Omit<ImageProps, 'src' | 'alt' | 'width' | 'h
     <Image 
       src={logoSrc} 
       alt="DevFest Vizag Logo" 
-      width={24} 
-      height={24} 
+      width={2000}
+      height={300}
       {...props} 
     />
   );
