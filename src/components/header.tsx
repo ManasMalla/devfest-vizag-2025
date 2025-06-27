@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet'
 import { ThemeToggle } from './theme-toggle'
+import { AuthButton } from './auth-button'
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -92,6 +93,7 @@ export function Header() {
 
         {/* Right side */}
         <div className="flex flex-1 items-center justify-end space-x-2">
+          <AuthButton />
           <ThemeToggle />
         </div>
       </div>

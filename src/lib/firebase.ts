@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -10,8 +11,10 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app);
+// Initialize Firebase only if the project ID is set, to avoid errors during build/SSR
+// if the .env.local file is not set up.
+const app = firebaseConfig.projectId && !getApps().length ? initializeApp(firebaseConfig) : getApps().length > 0 ? getApp() : null;
+const db = app ? getFirestore(app) : null;
+const auth = app ? getAuth(app) : null;
 
-export { app, db };
+export { app, db, auth };
