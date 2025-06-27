@@ -8,19 +8,19 @@ runConfig:
 
 env:
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
-    secret: AIzaSyD9IAPrvOr7l87jb8BtRc8Bow17WeO3Imk
+    value: AIzaSyD9IAPrvOr7l87jb8BtRc8Bow17WeO3Imk
 
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-    secret: devfest-vizag-2025-hub.firebaseapp.com
+    value: devfest-vizag-2025-hub.firebaseapp.com
 
   - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
-    secret: devfest-vizag-2025-hub
+    value: devfest-vizag-2025-hub
 
   - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-    secret: devfest-vizag-2025-hub.firebasestorage.app
+    value: devfest-vizag-2025-hub.firebasestorage.app
 
   - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-    secret: 803340480784
+    value: 803340480784
   
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
-    secret: 1:803340480784:web:dc7b2206a050a2ac643595
+    value: 1:803340480784:web:dc7b2206a050a2ac643595
