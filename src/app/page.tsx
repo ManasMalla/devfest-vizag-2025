@@ -35,20 +35,22 @@ export default function Home() {
           {renderWelcomeMessage()}
         </div>
 
-        <div className="mt-8 flex flex-col sm:flex-row gap-4">
+        <div className="mt-8 flex flex-col items-center gap-4">
           {!loading && !user && <AuthButton />}
-          <Button asChild variant="outline">
-            <Link href="https://instagram.com/gdg_vizag" target="_blank" rel="noopener noreferrer">
-              <Instagram />
-              Follow on Instagram
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="https://gdg.community.dev/gdg-vizag" target="_blank" rel="noopener noreferrer">
-              <Users />
-              Join Community
-            </Link>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button asChild variant="outline">
+              <Link href="https://instagram.com/gdg_vizag" target="_blank" rel="noopener noreferrer">
+                <Instagram />
+                Follow on Instagram
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="https://gdg.community.dev/gdg-vizag" target="_blank" rel="noopener noreferrer">
+                <Users />
+                Join Community
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
       
