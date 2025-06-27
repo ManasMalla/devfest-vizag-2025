@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { Mountain, Twitter, Linkedin, Youtube } from 'lucide-react'
+import { Twitter, Linkedin, Youtube } from 'lucide-react'
 import config from '@/config.json'
+import { DevFestLogo } from './logo'
 
 export function Footer() {
   return (
@@ -9,7 +10,7 @@ export function Footer() {
         <div className="grid md:grid-cols-2 gap-8">
           <div className="flex flex-col gap-4">
             <Link href="/" className="flex items-center space-x-2">
-              <Mountain className="h-6 w-6 text-primary" />
+              <DevFestLogo className="h-6 w-6 text-primary" />
               <span className="font-bold">DevFest Vizag 2025</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-sm">
