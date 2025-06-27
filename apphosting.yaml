@@ -6,20 +6,21 @@ runConfig:
   # more instances in response to increased traffic.
   maxInstances: 1
 
-# Secrets are environment variables that are managed by Cloud Secret Manager
-# and are securely passed to your app. Ensure you have created these secrets
-# in your Google Cloud project.
-# https://firebase.google.com/docs/app-hosting/configure#secrets
-secrets:
-  - secret: NEXT_PUBLIC_FIREBASE_API_KEY
-    environmentVariable: NEXT_PUBLIC_FIREBASE_API_KEY
-  - secret: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-    environmentVariable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-  - secret: NEXT_PUBLIC_FIREBASE_PROJECT_ID
-    environmentVariable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
-  - secret: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-    environmentVariable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-  - secret: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-    environmentVariable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-  - secret: NEXT_PUBLIC_FIREBASE_APP_ID
-    environmentVariable: NEXT_PUBLIC_FIREBASE_APP_ID
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    secret: AIzaSyD9IAPrvOr7l87jb8BtRc8Bow17WeO3Imk
+
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    secret: devfest-vizag-2025-hub.firebaseapp.com
+
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    secret: devfest-vizag-2025-hub
+
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    secret: devfest-vizag-2025-hub.firebasestorage.app
+
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    secret: 803340480784
+  
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    secret: 1:803340480784:web:dc7b2206a050a2ac643595
