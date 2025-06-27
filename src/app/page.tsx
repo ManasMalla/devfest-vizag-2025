@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
 import { Skeleton } from "@/components/ui/skeleton";
+import { AuthButton } from "@/components/auth-button";
 
 export default function Home() {
   const [user, loading] = auth ? useAuthState(auth) : [null, true];
@@ -35,15 +36,16 @@ export default function Home() {
         </div>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-4">
+          {!loading && !user && <AuthButton />}
           <Button asChild variant="outline">
             <Link href="https://instagram.com/gdg_vizag" target="_blank" rel="noopener noreferrer">
-              <Instagram className="mr-2" />
+              <Instagram />
               Follow on Instagram
             </Link>
           </Button>
           <Button asChild variant="outline">
             <Link href="https://gdg.community.dev/gdg-vizag" target="_blank" rel="noopener noreferrer">
-              <Users className="mr-2" />
+              <Users />
               Join Community
             </Link>
           </Button>
