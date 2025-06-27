@@ -1,12 +1,4 @@
 import Image from "next/image"
-import { Card, CardContent } from "@/components/ui/card"
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
 
 const images = [
   { src: "https://placehold.co/600x400.png", alt: "DevFest attendee group photo", hint: "conference tech" },
@@ -19,38 +11,22 @@ const images = [
 
 export function Gallery() {
   return (
-    <div className="w-full max-w-5xl mx-auto py-12 px-4">
+    <div className="w-full max-w-6xl mx-auto py-12 px-4">
       <h2 className="text-3xl font-bold text-center mb-8">Glimpses From Past Events</h2>
-      <Carousel
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-        className="w-full"
-      >
-        <CarouselContent>
-          {images.map((image, index) => (
-            <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-              <div className="p-1">
-                <Card>
-                  <CardContent className="flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
-                    <Image
-                      src={image.src}
-                      alt={image.alt}
-                      width={600}
-                      height={400}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                      data-ai-hint={image.hint}
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious className="hidden sm:flex" />
-        <CarouselNext className="hidden sm:flex" />
-      </Carousel>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        {images.map((image, index) => (
+          <div key={index} className="overflow-hidden rounded-lg shadow-lg group aspect-video">
+            <Image
+              src={image.src}
+              alt={image.alt}
+              width={600}
+              height={400}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              data-ai-hint={image.hint}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
