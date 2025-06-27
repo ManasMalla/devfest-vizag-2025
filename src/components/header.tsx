@@ -15,6 +15,7 @@ const navLinks = [
   { href: '/sessions', label: 'Session Ideas' },
   { href: '/speakers', label: 'Speakers' },
   { href: '/sponsors', label: 'Sponsors' },
+  { href: '/code-of-conduct', label: 'Code of Conduct' },
 ]
 
 export function Header() {
