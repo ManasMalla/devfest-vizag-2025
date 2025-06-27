@@ -27,8 +27,8 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center justify-self-center">
-        <div className="flex items-center justify-start">
+      <div className="container flex h-14 max-w-screen-2xl items-center">
+        <div className="flex items-center justify-start flex-1">
           {/* Mobile menu */}
           <div className="md:hidden">
             <Sheet>
@@ -40,7 +40,7 @@ export function Header() {
               </SheetTrigger>
               <SheetContent side="left" className="pr-0">
                 <Link href="/" className="flex items-center space-x-2 mb-6">
-                  <DevFestLogo className="h-6 w-6 text-primary" />
+                  <DevFestLogo className="h-6 w-6" />
                   <span className="font-bold">DevFest Vizag 2025</span>
                 </Link>
                 <div className="flex flex-col space-y-3">
@@ -66,7 +66,7 @@ export function Header() {
           </div>
 
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <DevFestLogo className="h-6 w-6 text-primary" />
+            <DevFestLogo className="h-6 w-6" />
           </Link>
           
           <nav className="hidden md:flex items-center gap-6 text-sm">
@@ -88,7 +88,7 @@ export function Header() {
           </nav>
         </div>
         
-        <div className="flex flex-1 items-center justify-end">
+        <div className="flex items-center justify-end">
           <AuthButton />
           <ThemeToggle />
         </div>
