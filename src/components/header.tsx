@@ -9,14 +9,17 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet'
 import { ThemeToggle } from './theme-toggle'
 import { AuthButton } from './auth-button'
+import config from '@/config.json';
 
-const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/volunteer', label: 'Volunteer' },
-  { href: '/sessions', label: 'Session Ideas' },
-  { href: '/speakers', label: 'Speakers' },
-  { href: '/sponsors', label: 'Sponsors' },
-]
+const allNavLinks = [
+  { key: 'home', href: '/', label: 'Home' },
+  { key: 'volunteer', href: '/volunteer', label: 'Volunteer' },
+  { key: 'sessions', href: '/sessions', label: 'Session Ideas' },
+  { key: 'speakers', href: '/speakers', label: 'Speakers' },
+  { key: 'sponsors', href: '/sponsors', label: 'Sponsors' },
+] as const;
+
+const navLinks = allNavLinks.filter(link => config.navigation[link.key]);
 
 export function Header() {
   const pathname = usePathname();

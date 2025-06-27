@@ -1,0 +1,17 @@
+{
+  "navigation": {
+    "home": true,
+    "volunteer": true,
+    "sessions": true,
+    "speakers": true,
+    "sponsors": true,
+    "codeOfConduct": true
+  },
+  "socials": {
+    "instagram": "https://instagram.com/gdg_vizag",
+    "community": "https://gdg.community.dev/gdg-vizag",
+    "twitter": "https://twitter.com/gdgvizag",
+    "linkedin": "https://linkedin.com/company/gdg-vizag",
+    "youtube": "https://youtube.com/c/GDGVizag"
+  }
+}

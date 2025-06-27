@@ -8,6 +8,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
 import { Skeleton } from "@/components/ui/skeleton";
 import { AuthButton } from "@/components/auth-button";
+import config from '@/config.json';
 
 export default function Home() {
   const [user, loading] = auth ? useAuthState(auth) : [null, true];
@@ -36,16 +37,20 @@ export default function Home() {
         </div>
 
         <div className="mt-8 flex flex-col items-center gap-4">
-          {!loading && !user && <AuthButton />}
+          {!loading && !user && (
+            <div className="flex flex-col items-center gap-4 mb-4">
+              <AuthButton />
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row gap-4">
             <Button asChild variant="outline">
-              <Link href="https://instagram.com/gdg_vizag" target="_blank" rel="noopener noreferrer">
+              <Link href={config.socials.instagram} target="_blank" rel="noopener noreferrer">
                 <Instagram />
                 Follow on Instagram
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="https://gdg.community.dev/gdg-vizag" target="_blank" rel="noopener noreferrer">
+              <Link href={config.socials.community} target="_blank" rel="noopener noreferrer">
                 <Users />
                 Join Community
               </Link>
