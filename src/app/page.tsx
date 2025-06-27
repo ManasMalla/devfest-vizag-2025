@@ -1,11 +1,13 @@
 import { SubscriptionForm } from "@/components/subscription-form";
 import { Button } from "@/components/ui/button";
+import { Gallery } from "@/components/gallery";
 import { Instagram, Users } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex flex-grow flex-col items-center justify-center p-4 text-center animate-fade-in-up">
+    <div className="flex flex-grow flex-col items-center animate-fade-in-up w-full">
+      <div className="flex flex-col items-center justify-center p-4 text-center pt-16 pb-12">
         <div className="animate-pulse bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-5xl md:text-7xl font-extrabold text-transparent py-2">
           Coming Soon
         </div>
@@ -29,6 +31,9 @@ export default function Home() {
             </Link>
           </Button>
         </div>
+      </div>
+      
+      <Gallery />
     </div>
   );
 }
