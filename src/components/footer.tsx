@@ -11,25 +11,25 @@ export function Footer() {
               <Mountain className="h-6 w-6 text-primary" />
               <span className="font-bold">DevFest Vizag 2025</span>
             </Link>
-            <p className="text-muted-foreground max-w-sm">
+            <p className="text-sm text-muted-foreground max-w-sm">
               The biggest developer conference in Visakhapatnam, brought to you by the community, for the community.
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
             <div className="grid gap-2">
-              <h3 className="font-semibold">Navigation</h3>
-              <Link href="/" className="text-muted-foreground hover:text-foreground">Home</Link>
-              <Link href="/speakers" className="text-muted-foreground hover:text-foreground">Speakers</Link>
-              <Link href="/sessions" className="text-muted-foreground hover:text-foreground">Sessions</Link>
-              <Link href="/sponsors" className="text-muted-foreground hover:text-foreground">Sponsors</Link>
+              <h3 className="text-sm font-semibold">Navigation</h3>
+              <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">Home</Link>
+              <Link href="/speakers" className="text-sm text-muted-foreground hover:text-foreground">Speakers</Link>
+              <Link href="/sessions" className="text-sm text-muted-foreground hover:text-foreground">Sessions</Link>
+              <Link href="/sponsors" className="text-sm text-muted-foreground hover:text-foreground">Sponsors</Link>
             </div>
             <div className="grid gap-2">
-              <h3 className="font-semibold">Community</h3>
-              <Link href="/volunteer" className="text-muted-foreground hover:text-foreground">Volunteer</Link>
-              <Link href="/code-of-conduct" className="text-muted-foreground hover:text-foreground">Code of Conduct</Link>
+              <h3 className="text-sm font-semibold">Community</h3>
+              <Link href="/volunteer" className="text-sm text-muted-foreground hover:text-foreground">Volunteer</Link>
+              <Link href="/code-of-conduct" className="text-sm text-muted-foreground hover:text-foreground">Code of Conduct</Link>
             </div>
             <div className="grid gap-2">
-              <h3 className="font-semibold">Social</h3>
+              <h3 className="text-sm font-semibold">Social</h3>
               <div className="flex gap-4">
                 <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                   <Twitter className="h-5 w-5" />
