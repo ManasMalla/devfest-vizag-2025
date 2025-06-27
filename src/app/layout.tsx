@@ -31,7 +31,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header />
-          <main className="flex-grow flex flex-col">{children}</main>
+          <main className="relative flex-grow flex flex-col">
+            <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,hsl(var(--primary)/0.1),transparent,hsl(var(--accent)/0.1),transparent,hsl(var(--primary)/0.1))] bg-[size:400%_400%] animate-background-pan"></div>
+            {children}
+          </main>
           <Footer />
           <Toaster />
         </ThemeProvider>

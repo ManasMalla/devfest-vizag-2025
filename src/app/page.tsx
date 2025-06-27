@@ -27,9 +27,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative flex flex-grow flex-col items-center animate-fade-in-up w-full overflow-hidden">
-      <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,hsl(var(--primary)/0.1),transparent,hsl(var(--accent)/0.1),transparent,hsl(var(--primary)/0.1))] bg-[size:400%_400%] animate-background-pan"></div>
-      
+    <div className="flex flex-grow flex-col items-center animate-fade-in-up w-full">
       <div className="z-10 flex flex-col items-center justify-center p-4 text-center pt-16 pb-12">
         <div className="animate-pulse bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-5xl md:text-7xl font-extrabold text-transparent py-2">
           Coming Soon
