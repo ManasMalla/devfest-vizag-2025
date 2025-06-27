@@ -30,9 +30,9 @@ export default function Home() {
         <div className="animate-pulse bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-5xl md:text-7xl font-extrabold text-transparent py-2">
           Coming Soon
         </div>
-        <p className="mt-6 mb-8 text-base md:text-lg text-muted-foreground max-w-lg min-h-[28px] flex items-center justify-center">
+        <div className="mt-6 mb-8 text-base md:text-lg text-muted-foreground max-w-lg min-h-[28px] flex items-center justify-center">
           {renderWelcomeMessage()}
-        </p>
+        </div>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-4">
           <Button asChild variant="outline">
