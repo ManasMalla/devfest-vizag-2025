@@ -4,7 +4,6 @@ import { useTheme } from 'next-themes';
 import type { SVGProps } from 'react';
 import { useEffect, useState } from 'react';
 
-// Paste your light mode SVG code inside this component.
 function LightLogo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -30,7 +29,6 @@ function LightLogo(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-// Paste your dark mode SVG code inside this component.
 function DarkLogo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -58,7 +56,6 @@ export function DevFestLogo(props: SVGProps<SVGSVGElement>) {
   }, []);
 
   if (!mounted) {
-    // To prevent hydration mismatch, we render an empty SVG with the same props.
     return <svg {...props} />;
   }
   
