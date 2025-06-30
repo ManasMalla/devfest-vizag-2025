@@ -47,14 +47,14 @@ export function PastSponsors() {
         <h2 className="text-3xl font-bold text-center mb-12">
           Our Valued Past Sponsors
         </h2>
-        <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8 md:gap-x-16">
+        <div className="flex flex-wrap items-center justify-center gap-8">
           {sponsors.map((sponsor) => (
             <Link
               key={sponsor.name}
               href={sponsor.websiteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="group"
+              className="group block rounded-lg border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-primary"
               aria-label={`Visit ${sponsor.name}'s website`}
             >
               <Image
@@ -63,7 +63,7 @@ export function PastSponsors() {
                 width={150}
                 height={60}
                 data-ai-hint={sponsor.aiHint}
-                className="object-contain transition-all duration-300 filter grayscale group-hover:filter-none group-hover:scale-110"
+                className="object-contain transition-transform duration-300 filter grayscale group-hover:filter-none group-hover:scale-110"
               />
             </Link>
           ))}
