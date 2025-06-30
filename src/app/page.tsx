@@ -9,6 +9,7 @@ import { auth } from '@/lib/firebase';
 import { Skeleton } from "@/components/ui/skeleton";
 import { AuthButton } from "@/components/auth-button";
 import config from '@/config.json';
+import { PastSponsors } from "@/components/past-sponsors";
 
 export default function Home() {
   const [user, loading] = auth ? useAuthState(auth) : [null, true];
@@ -60,6 +61,7 @@ export default function Home() {
       </div>
       
       <Gallery />
+      <PastSponsors />
     </div>
   );
 }

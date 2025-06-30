@@ -1,13 +1,25 @@
 import Image from "next/image"
 
 const images = [
-  { src: "https://placehold.co/600x400.png", alt: "DevFest attendee group photo", hint: "conference tech" },
-  { src: "https://placehold.co/600x400.png", alt: "Speaker on stage", hint: "presentation stage" },
-  { src: "https://placehold.co/600x400.png", alt: "Networking session", hint: "people networking" },
-  { src: "https://placehold.co/600x400.png", alt: "Hands-on workshop", hint: "workshop tech" },
-  { src: "https://placehold.co/600x400.png", alt: "Audience listening to a talk", hint: "audience conference" },
-  { src: "https://placehold.co/600x400.png", alt: "Sponsor booths", hint: "event sponsor" },
-];
+  { src: "/images/gallery/IMG_00000.jpg", alt: "Gallery image 0" },
+  { src: "/images/gallery/IMG_00001.jpg", alt: "Gallery image 1" },
+  { src: "/images/gallery/IMG_00002.jpg", alt: "Gallery image 2" },
+  { src: "/images/gallery/IMG_00004.jpg", alt: "Gallery image 4" },
+  { src: "/images/gallery/IMG_00005.jpg", alt: "Gallery image 5" },
+  { src: "/images/gallery/IMG_00006.jpg", alt: "Gallery image 6" },
+  { src: "/images/gallery/IMG_00007.jpg", alt: "Gallery image 7" },
+  { src: "/images/gallery/IMG_00008.jpg", alt: "Gallery image 8" },
+  { src: "/images/gallery/IMG_00009.jpg", alt: "Gallery image 9" },
+  { src: "/images/gallery/IMG_00010.jpg", alt: "Gallery image 10" },
+  { src: "/images/gallery/IMG_00011.jpg", alt: "Gallery image 11" },
+  { src: "/images/gallery/IMG_00012.jpg", alt: "Gallery image 12" },
+  { src: "/images/gallery/IMG_00013.jpg", alt: "Gallery image 13" },
+  { src: "/images/gallery/IMG_00014.jpg", alt: "Gallery image 14" },
+  { src: "/images/gallery/IMG_00015.jpg", alt: "Gallery image 15" },
+  { src: "/images/gallery/IMG_00016.jpg", alt: "Gallery image 16" },
+  { src: "/images/gallery/IMG_00018.jpg", alt: "Gallery image 18" },
+  { src: "/images/gallery/IMG_00019.jpg", alt: "Gallery image 19" },
+]
 
 export function Gallery() {
   return (
@@ -22,7 +34,6 @@ export function Gallery() {
               width={600}
               height={400}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-              data-ai-hint={image.hint}
             />
           </div>
         ))}
