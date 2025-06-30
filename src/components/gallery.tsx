@@ -24,7 +24,7 @@ const images = [
 export function Gallery() {
   return (
     <div className="w-full max-w-6xl mx-auto py-12 px-4">
-      <h2 className="text-3xl font-bold text-center mb-8">Glimpses From Past Events</h2>
+      <h2 className="text-3xl font-bold text-center mb-8">Glimpses From DevFest Vizag 2024</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {images.map((image, index) => (
           <div key={index} className="overflow-hidden rounded-lg shadow-lg group aspect-video">

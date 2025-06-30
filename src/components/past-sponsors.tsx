@@ -3,40 +3,34 @@ import Link from "next/link";
 
 const sponsors = [
   {
-    name: "Google",
-    logoUrl: "https://placehold.co/150x75.png",
-    websiteUrl: "https://google.com",
-    aiHint: "google logo"
+    name: "Google for Developers",
+    logoUrl: "/images/past-sponsors/googlefordevelopers.png",
+    websiteUrl: "https://developers.google.com/",
+    aiHint: "Google For Developers Logo"
   },
   {
-    name: "Firebase",
-    logoUrl: "https://placehold.co/150x75.png",
-    websiteUrl: "https://firebase.google.com",
-    aiHint: "firebase logo"
+    name: "GITAM University",
+    logoUrl: "/images/past-sponsors/gitam.png",
+    websiteUrl: "https://www.gitam.edu/",
+    aiHint: "GITAM University logo"
   },
   {
-    name: "GitHub",
-    logoUrl: "https://placehold.co/150x75.png",
-    websiteUrl: "https://github.com",
-    aiHint: "github logo"
+    name: "The DigiFac",
+    logoUrl: "/images/past-sponsors/thedigifac.png",
+    websiteUrl: "https://www.thedigifac.com/",
+    aiHint: "The DigiFac logo"
   },
   {
-    name: "Vercel",
-    logoUrl: "https://placehold.co/150x75.png",
-    websiteUrl: "https://vercel.com",
-    aiHint: "vercel logo"
+    name: "MSI",
+    logoUrl: "/images/past-sponsors/msi.png",
+    websiteUrl: "https://in.msi.com/",
+    aiHint: "MSI logo"
   },
     {
-    name: "JetBrains",
-    logoUrl: "https://placehold.co/150x75.png",
-    websiteUrl: "https://www.jetbrains.com/",
-    aiHint: "jetbrains logo"
-  },
-  {
-    name: "DigitalOcean",
-    logoUrl: "https://placehold.co/150x75.png",
-    websiteUrl: "https://www.digitalocean.com/",
-    aiHint: "digitalocean logo"
+    name: "aHub",
+    logoUrl: "/images/past-sponsors/ahub.png",
+    websiteUrl: "https://www.a-hub.co/",
+    aiHint: "a Hub logo"
   }
 ];
 
@@ -45,7 +39,7 @@ export function PastSponsors() {
     <section className="w-full py-12">
       <div className="container mx-auto px-4 md:px-6">
         <h2 className="text-3xl font-bold text-center mb-12">
-          Our Valued Past Sponsors
+          Our Past Sponsors
         </h2>
         <div className="flex flex-wrap items-center justify-center gap-8">
           {sponsors.map((sponsor) => (
@@ -63,7 +57,7 @@ export function PastSponsors() {
                 width={150}
                 height={60}
                 data-ai-hint={sponsor.aiHint}
-                className="object-contain transition-transform duration-300 filter grayscale group-hover:filter-none group-hover:scale-110"
+                className="object-contain transition-transform duration-300 group-hover:scale-110"
               />
             </Link>
           ))}
