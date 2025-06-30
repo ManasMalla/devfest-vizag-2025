@@ -48,7 +48,7 @@ export function PastSponsors() {
               href={sponsor.websiteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="group block rounded-lg border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-primary"
+              className="group block rounded-lg border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-primary bg-white"
               aria-label={`Visit ${sponsor.name}'s website`}
             >
               <Image
