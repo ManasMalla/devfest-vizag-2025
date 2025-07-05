@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { format } from 'date-fns';
 import {
   Table,
@@ -66,8 +66,9 @@ export function ApplicationsList({ initialApplications, initialNextCursor, jobs,
   const [selectedApp, setSelectedApp] = useState<ClientJobApplication | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const { toast } = useToast();
+  const isInitialMount = useRef(true);
 
-  const fetchApps = async (cursor: string | undefined, direction: 'next' | 'prev' | 'reset') => {
+  const fetchApps = useCallback(async (cursor: string | undefined, direction: 'next' | 'prev' | 'reset') => {
     setIsLoading(true);
     try {
       const result = await getApplications(
@@ -90,20 +91,23 @@ export function ApplicationsList({ initialApplications, initialNextCursor, jobs,
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [token, statusFilter, jobTitleFilter, toast]);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return;
+    }
+    fetchApps(undefined, 'reset');
+  }, [statusFilter, jobTitleFilter, fetchApps]);
+
 
   const handleStatusFilterChange = (value: ApplicationStatus | 'All') => {
     setStatusFilter(value);
-    setApplications([]); // Clear current view
-    setJobTitleFilter(jobTitleFilter);
-    fetchApps(undefined, 'reset');
   };
 
   const handleJobFilterChange = (value: string | 'All') => {
     setJobTitleFilter(value);
-    setApplications([]); // Clear current view
-    setStatusFilter(statusFilter);
-    fetchApps(undefined, 'reset');
   };
 
   const handleViewDetails = (application: ClientJobApplication) => {
