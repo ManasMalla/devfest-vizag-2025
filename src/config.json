@@ -4,7 +4,8 @@
     "volunteer": true,
     "sessions": false,
     "speakers": false,
-    "sponsors": false  
+    "sponsors": false,
+    "codeOfConduct": true
   },
   "socials": {
     "instagram": "https://instagram.com/gdg_vizag",
