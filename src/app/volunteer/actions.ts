@@ -2,7 +2,7 @@
 
 import { adminDb, adminAuth } from '@/lib/firebase-admin';
 import type { Job, JobApplication } from '@/types';
-import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
@@ -55,9 +55,8 @@ export async function isAdmin(token?: string) {
 // Job actions
 export async function getJobs(): Promise<Job[]> {
   try {
-    const jobsCollection = collection(adminDb, 'jobs');
-    const q = query(jobsCollection, orderBy('title'));
-    const jobSnapshot = await getDocs(q);
+    const jobsCollection = adminDb.collection('jobs');
+    const jobSnapshot = await jobsCollection.orderBy('title').get();
     const jobList = jobSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
     return jobList;
   } catch (error) {
@@ -84,7 +83,7 @@ export async function addJob(formData: FormData, token?: string) {
       category,
       additionalQuestions: additionalQuestions?.split('\n').filter(q => q.trim() !== '') || [],
     };
-    const newDocRef = await addDoc(collection(adminDb, 'jobs'), jobData);
+    const newDocRef = await adminDb.collection('jobs').add(jobData);
     
     revalidatePath('/volunteer');
     revalidatePath('/admin');
@@ -114,14 +113,14 @@ export async function updateJob(jobId: string, formData: FormData, token?: strin
     
     const { title, description, category, additionalQuestions } = validatedData;
 
-    const jobRef = doc(adminDb, 'jobs', jobId);
+    const jobRef = adminDb.collection('jobs').doc(jobId);
     const updatedData = {
       title,
       description,
       category,
       additionalQuestions: additionalQuestions?.split('\n').filter(q => q.trim() !== '') || [],
     };
-    await updateDoc(jobRef, updatedData);
+    await jobRef.update(updatedData);
     
     revalidatePath('/volunteer');
     revalidatePath('/admin');
@@ -145,7 +144,7 @@ export async function deleteJob(jobId: string, token?: string) {
   }
 
   try {
-    await deleteDoc(doc(adminDb, 'jobs', jobId));
+    await adminDb.collection('jobs').doc(jobId).delete();
     revalidatePath('/volunteer');
     revalidatePath('/admin');
     return { success: "Job deleted successfully." };
@@ -186,9 +185,9 @@ export async function submitApplication(formData: FormData, token?: string) {
       answers: validatedData.answers || {},
     };
 
-    await addDoc(collection(adminDb, 'applications'), {
+    await adminDb.collection('applications').add({
       ...applicationData,
-      submittedAt: serverTimestamp(),
+      submittedAt: FieldValue.serverTimestamp(),
     });
     return { success: 'Application submitted successfully!' };
   } catch (error) {
