@@ -47,7 +47,8 @@ export async function isAdmin(token?: string) {
     return { isAdmin: userDoc.exists };
   } catch (error) {
     console.error("Error checking admin status:", error);
-    return { isAdmin: false, error: "An error occurred while checking admin status." };
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return { isAdmin: false, error: `An error occurred while checking admin status: ${errorMessage}` };
   }
 }
 
@@ -96,7 +97,8 @@ export async function addJob(formData: FormData, token?: string) {
       return { error: "Invalid data: " + JSON.stringify(error.flatten().fieldErrors) };
     }
     console.error("Error adding job: ", error);
-    return { error: 'Failed to add job.' };
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return { error: `Failed to add job: ${errorMessage}` };
   }
 }
 
@@ -131,7 +133,8 @@ export async function updateJob(jobId: string, formData: FormData, token?: strin
       return { error: "Invalid data: " + JSON.stringify(error.flatten().fieldErrors) };
     }
     console.error("Error updating job: ", error);
-    return { error: 'Failed to update job.' };
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return { error: `Failed to update job: ${errorMessage}` };
   }
 }
 
@@ -148,7 +151,8 @@ export async function deleteJob(jobId: string, token?: string) {
     return { success: "Job deleted successfully." };
   } catch (error) {
     console.error("Error deleting job: ", error);
-    return { error: 'Failed to delete job.' };
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return { error: `Failed to delete job: ${errorMessage}` };
   }
 }
 
@@ -192,6 +196,7 @@ export async function submitApplication(formData: FormData, token?: string) {
       return { error: "Invalid data: " + JSON.stringify(error.flatten().fieldErrors) };
     }
     console.error("Error submitting application: ", error);
-    return { error: 'There was an error submitting your application.' };
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return { error: `There was an error submitting your application: ${errorMessage}` };
   }
 }
