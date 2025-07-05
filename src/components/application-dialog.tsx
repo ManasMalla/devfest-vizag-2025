@@ -60,6 +60,14 @@ export function ApplicationDialog({ job, user, children }: ApplicationDialogProp
 
   async function onSubmit(values: z.infer<typeof ApplicationSchema>) {
     setIsSubmitting(true);
+
+    if (!user) {
+        toast({ variant: 'destructive', title: 'Not Signed In', description: 'You must be signed in to apply.' });
+        setIsSubmitting(false);
+        return;
+    }
+    const token = await user.getIdToken();
+    
     const formData = new FormData();
     formData.append('fullName', values.fullName);
     formData.append('phone', values.phone);
@@ -73,7 +81,7 @@ export function ApplicationDialog({ job, user, children }: ApplicationDialogProp
         formData.append(`answer-${question}`, answer);
     });
 
-    const result = await submitApplication(formData);
+    const result = await submitApplication(formData, token);
 
     if (result.success) {
       toast({

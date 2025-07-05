@@ -35,6 +35,7 @@ interface JobFormDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   job: Job | null;
+  token: string;
   onFormSubmit: (job: Job) => void;
 }
 
@@ -45,7 +46,7 @@ const JobSchema = z.object({
   additionalQuestions: z.string().optional(),
 });
 
-export function JobFormDialog({ isOpen, setIsOpen, job, onFormSubmit }: JobFormDialogProps) {
+export function JobFormDialog({ isOpen, setIsOpen, job, token, onFormSubmit }: JobFormDialogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -79,7 +80,9 @@ export function JobFormDialog({ isOpen, setIsOpen, job, onFormSubmit }: JobFormD
     formData.append('category', values.category);
     formData.append('additionalQuestions', values.additionalQuestions || '');
 
-    const result = job ? await updateJob(job.id, formData) : await addJob(formData);
+    const result = job
+      ? await updateJob(job.id, formData, token)
+      : await addJob(formData, token);
 
     if (result.success) {
       toast({ title: 'Success', description: result.success });
@@ -124,7 +127,7 @@ export function JobFormDialog({ isOpen, setIsOpen, job, onFormSubmit }: JobFormD
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                   <Select onValueChange={field.onChange} defaultValue={field.value ?? 'Volunteer'}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a category" />

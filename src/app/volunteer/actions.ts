@@ -1,6 +1,5 @@
 'use server';
 
-import { auth, db } from '@/lib/firebase';
 import { adminDb, adminAuth } from '@/lib/firebase-admin';
 import type { Job, JobApplication } from '@/types';
 import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
@@ -24,25 +23,40 @@ const ApplicationSchema = z.object({
   answers: z.record(z.string()).optional(),
 });
 
+// Helper to verify token and get UID
+async function getVerifiedUid(token: string | undefined): Promise<string | null> {
+  if (!token) return null;
+  try {
+    const decodedToken = await adminAuth.verifyIdToken(token, true); // Check for revocation
+    return decodedToken.uid;
+  } catch (error) {
+    // This can happen if the token is expired or invalid.
+    // It's not necessarily a server error, so we can log it silently on the server
+    // and let the client handle the user feedback.
+    return null;
+  }
+}
+
 
 // Admin check
-export async function isAdmin() {
-  if (!auth.currentUser) {
-    return { isAdmin: false };
+export async function isAdmin(token?: string) {
+  const uid = await getVerifiedUid(token);
+  if (!uid) {
+    return { isAdmin: false, error: "Invalid or missing authentication token." };
   }
   try {
-    const userDoc = await adminDb.collection('admins').doc(auth.currentUser.uid).get();
+    const userDoc = await adminDb.collection('admins').doc(uid).get();
     return { isAdmin: userDoc.exists };
   } catch (error) {
     console.error("Error checking admin status:", error);
-    return { isAdmin: false };
+    return { isAdmin: false, error: "An error occurred while checking admin status." };
   }
 }
 
 // Job actions
 export async function getJobs(): Promise<Job[]> {
   try {
-    const jobsCollection = collection(db, 'jobs');
+    const jobsCollection = collection(adminDb, 'jobs');
     const q = query(jobsCollection, orderBy('title'));
     const jobSnapshot = await getDocs(q);
     const jobList = jobSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
@@ -53,7 +67,12 @@ export async function getJobs(): Promise<Job[]> {
   }
 }
 
-export async function addJob(formData: FormData) {
+export async function addJob(formData: FormData, token?: string) {
+  const adminCheck = await isAdmin(token);
+  if (!adminCheck.isAdmin) {
+    return { error: "Unauthorized" };
+  }
+
   const rawData = Object.fromEntries(formData.entries());
   const validatedFields = JobSchema.safeParse(rawData);
 
@@ -63,13 +82,9 @@ export async function addJob(formData: FormData) {
   
   const { title, description, category, additionalQuestions } = validatedFields.data;
 
-  const adminCheck = await isAdmin();
-  if (!adminCheck.isAdmin) {
-    return { error: "Unauthorized" };
-  }
 
   try {
-    await addDoc(collection(db, 'jobs'), {
+    await addDoc(collection(adminDb, 'jobs'), {
       title,
       description,
       category,
@@ -83,7 +98,12 @@ export async function addJob(formData: FormData) {
   }
 }
 
-export async function updateJob(jobId: string, formData: FormData) {
+export async function updateJob(jobId: string, formData: FormData, token?: string) {
+  const adminCheck = await isAdmin(token);
+  if (!adminCheck.isAdmin) {
+    return { error: "Unauthorized" };
+  }
+
   const rawData = Object.fromEntries(formData.entries());
    const validatedFields = JobSchema.safeParse(rawData);
 
@@ -93,13 +113,8 @@ export async function updateJob(jobId: string, formData: FormData) {
   
   const { title, description, category, additionalQuestions } = validatedFields.data;
 
-  const adminCheck = await isAdmin();
-  if (!adminCheck.isAdmin) {
-    return { error: "Unauthorized" };
-  }
-  
   try {
-    const jobRef = doc(db, 'jobs', jobId);
+    const jobRef = doc(adminDb, 'jobs', jobId);
     await updateDoc(jobRef, {
       title,
       description,
@@ -114,14 +129,14 @@ export async function updateJob(jobId: string, formData: FormData) {
   }
 }
 
-export async function deleteJob(jobId: string) {
-  const adminCheck = await isAdmin();
+export async function deleteJob(jobId: string, token?: string) {
+  const adminCheck = await isAdmin(token);
   if (!adminCheck.isAdmin) {
     return { error: "Unauthorized" };
   }
 
   try {
-    await deleteDoc(doc(db, 'jobs', jobId));
+    await deleteDoc(doc(adminDb, 'jobs', jobId));
     revalidatePath('/volunteer');
     revalidatePath('/admin');
     return { success: "Job deleted successfully." };
@@ -132,8 +147,9 @@ export async function deleteJob(jobId: string) {
 
 
 // Application actions
-export async function submitApplication(formData: FormData) {
-  if (!auth.currentUser) {
+export async function submitApplication(formData: FormData, token?: string) {
+  const uid = await getVerifiedUid(token);
+  if (!uid) {
     return { error: 'You must be signed in to apply.' };
   }
 
@@ -153,15 +169,17 @@ export async function submitApplication(formData: FormData) {
     return { error: "Invalid data: " + JSON.stringify(validatedFields.error.flatten().fieldErrors) };
   }
 
-  const applicationData: Omit<JobApplication, 'id' | 'submittedAt'> = {
-    ...validatedFields.data,
-    userId: auth.currentUser.uid,
-    userEmail: auth.currentUser.email!,
-    answers: validatedFields.data.answers || {},
-  };
-
   try {
-    await addDoc(collection(db, 'applications'), {
+    const userRecord = await adminAuth.getUser(uid);
+
+    const applicationData: Omit<JobApplication, 'id' | 'submittedAt'> = {
+      ...validatedFields.data,
+      userId: uid,
+      userEmail: userRecord.email!,
+      answers: validatedFields.data.answers || {},
+    };
+
+    await addDoc(collection(adminDb, 'applications'), {
       ...applicationData,
       submittedAt: serverTimestamp(),
     });

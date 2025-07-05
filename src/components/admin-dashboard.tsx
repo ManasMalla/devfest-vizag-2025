@@ -19,9 +19,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 interface AdminDashboardProps {
   initialJobs: Job[];
+  token: string;
 }
 
-export default function AdminDashboard({ initialJobs }: AdminDashboardProps) {
+export default function AdminDashboard({ initialJobs, token }: AdminDashboardProps) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -38,7 +39,7 @@ export default function AdminDashboard({ initialJobs }: AdminDashboardProps) {
   };
   
   const handleDelete = async (jobId: string) => {
-    const result = await deleteJob(jobId);
+    const result = await deleteJob(jobId, token);
     if (result.success) {
       setJobs(jobs.filter((job) => job.id !== jobId));
       toast({ title: "Success", description: result.success });
@@ -136,6 +137,7 @@ export default function AdminDashboard({ initialJobs }: AdminDashboardProps) {
         isOpen={isFormOpen}
         setIsOpen={setIsFormOpen}
         job={selectedJob}
+        token={token}
         onFormSubmit={onFormSubmit}
       />
     </>
