@@ -22,6 +22,7 @@ import { MoreHorizontal, Loader2 } from 'lucide-react';
 import type { ClientJobApplication, ApplicationStatus } from '@/types';
 import { updateApplicationStatus } from '@/app/volunteer/actions';
 import { useToast } from '@/hooks/use-toast';
+import { ApplicationDetailsDialog } from './application-details-dialog';
 
 interface ApplicationsListProps {
   initialApplications: ClientJobApplication[];
@@ -49,6 +50,8 @@ export function ApplicationsList({ initialApplications, token }: ApplicationsLis
   const [applications, setApplications] = useState<ClientJobApplication[]>(initialApplications);
   const [filter, setFilter] = useState<ApplicationStatus | 'All'>('All');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [selectedApp, setSelectedApp] = useState<ClientJobApplication | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const { toast } = useToast();
 
   const filteredApplications = useMemo(() => {
@@ -58,7 +61,13 @@ export function ApplicationsList({ initialApplications, token }: ApplicationsLis
     return applications.filter((app) => app.status === filter);
   }, [applications, filter]);
 
-  const handleStatusUpdate = async (applicationId: string, newStatus: ApplicationStatus) => {
+  const handleViewDetails = (application: ClientJobApplication) => {
+    setSelectedApp(application);
+    setIsDetailsOpen(true);
+  };
+
+  const handleStatusUpdate = async (applicationId: string, newStatus: ApplicationStatus, e: React.MouseEvent) => {
+    e.stopPropagation();
     setUpdatingId(applicationId);
     const result = await updateApplicationStatus(applicationId, newStatus, token);
     if (result.success) {
@@ -118,7 +127,7 @@ export function ApplicationsList({ initialApplications, token }: ApplicationsLis
           <TableBody>
             {filteredApplications.length > 0 ? (
               filteredApplications.map((app) => (
-                <TableRow key={app.id}>
+                <TableRow key={app.id} onClick={() => handleViewDetails(app)} className="cursor-pointer">
                   <TableCell>
                     <div className="font-medium">{app.fullName}</div>
                     <div className="text-sm text-muted-foreground">{app.userEmail}</div>
@@ -134,16 +143,16 @@ export function ApplicationsList({ initialApplications, token }: ApplicationsLis
                     ) : (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
+                          <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                           {getAvailableActions(app.status).map((action) => (
                             <DropdownMenuItem
                               key={action}
-                              onClick={() => handleStatusUpdate(app.id, action)}
+                              onClick={(e) => handleStatusUpdate(app.id, action, e)}
                             >
                               {action}
                             </DropdownMenuItem>
@@ -167,6 +176,11 @@ export function ApplicationsList({ initialApplications, token }: ApplicationsLis
           </TableBody>
         </Table>
       </div>
+      <ApplicationDetailsDialog
+        application={selectedApp}
+        isOpen={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+      />
     </div>
   );
 }
