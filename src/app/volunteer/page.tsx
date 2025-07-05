@@ -1,19 +1,33 @@
-import { GoogleFormEmbed } from "@/components/google-form-embed"
+import { getJobs } from "@/app/volunteer/actions";
+import JobBoard from "@/components/job-board";
+import { auth } from "@/lib/firebase";
+import type { User } from "firebase/auth";
 
-export default function VolunteerPage() {
-  const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScw-n2i0N-GBCp2k2a2iCVo4kBbX-9P4g-Oq-u-K2k_y-Z-3A/viewform?embedded=true";
+export const dynamic = 'force-dynamic';
+
+export default async function VolunteerPage() {
+  // This is a server component, but auth state is needed on the client.
+  // We can't use react-firebase-hooks/auth here directly.
+  // We'll pass the initial jobs to the client component, which will handle auth state.
+  const jobs = await getJobs();
+  
+  // A note on passing user data:
+  // For this implementation, we will let the client component `JobBoard`
+  // determine the user's auth state using the `useAuthState` hook.
+  // This is a common and effective pattern in Next.js.
 
   return (
     <div className="container mx-auto py-12 px-4 animate-fade-in-up">
-      <div className="text-center mb-8">
+      <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">
-          Volunteer at DevFest Vizag
+          Join the Team
         </h1>
-        <p className="mt-4 text-lg text-muted-foreground">
-          Join our amazing team and help make DevFest Vizag 2025 a success!
+        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+          Help make DevFest Vizag 2025 a massive success! We have openings for various roles.
         </p>
       </div>
-      <GoogleFormEmbed formUrl={formUrl} title="Volunteer Application Form" />
+      
+      <JobBoard jobs={jobs} />
     </div>
   )
 }
