@@ -55,20 +55,22 @@ export function JobFormDialog({ isOpen, setIsOpen, job, token, onFormSubmit }: J
   });
   
   useEffect(() => {
-    if (job) {
-      form.reset({
-        title: job.title,
-        description: job.description,
-        category: job.category,
-        additionalQuestions: job.additionalQuestions?.join('\n') || '',
-      });
-    } else {
-      form.reset({
-        title: '',
-        description: '',
-        category: 'Volunteer',
-        additionalQuestions: '',
-      });
+    if (isOpen) {
+        if (job) {
+          form.reset({
+            title: job.title,
+            description: job.description,
+            category: job.category,
+            additionalQuestions: job.additionalQuestions?.join('\n') || '',
+          });
+        } else {
+          form.reset({
+            title: '',
+            description: '',
+            category: 'Volunteer',
+            additionalQuestions: '',
+          });
+        }
     }
   }, [job, form, isOpen]);
 
@@ -84,12 +86,9 @@ export function JobFormDialog({ isOpen, setIsOpen, job, token, onFormSubmit }: J
       ? await updateJob(job.id, formData, token)
       : await addJob(formData, token);
 
-    if (result.success) {
+    if (result.success && result.job) {
       toast({ title: 'Success', description: result.success });
-      // This is a bit of a hack to refresh server data on the client.
-      // A full solution would involve a more robust state management library.
-      // For now, we manually update the parent's state.
-      onFormSubmit({ id: job?.id || 'new', ...values, additionalQuestions: values.additionalQuestions?.split('\n') });
+      onFormSubmit(result.job);
       setIsOpen(false);
     } else {
       toast({ variant: 'destructive', title: 'Error', description: result.error });

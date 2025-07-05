@@ -77,22 +77,26 @@ export async function addJob(formData: FormData, token?: string) {
   const validatedFields = JobSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
-    return { error: "Invalid data. " + validatedFields.error.flatten().fieldErrors };
+    return { error: "Invalid data. " + JSON.stringify(validatedFields.error.flatten().fieldErrors) };
   }
   
   const { title, description, category, additionalQuestions } = validatedFields.data;
 
-
   try {
-    await addDoc(collection(adminDb, 'jobs'), {
+    const jobData = {
       title,
       description,
       category,
       additionalQuestions: additionalQuestions?.split('\n').filter(q => q.trim() !== '') || [],
-    });
+    };
+    const newDocRef = await addDoc(collection(adminDb, 'jobs'), jobData);
+    
     revalidatePath('/volunteer');
     revalidatePath('/admin');
-    return { success: "Job added successfully." };
+
+    const newJob: Job = { id: newDocRef.id, ...jobData };
+
+    return { success: "Job added successfully.", job: newJob };
   } catch (error) {
     return { error: 'Failed to add job.' };
   }
@@ -115,15 +119,19 @@ export async function updateJob(jobId: string, formData: FormData, token?: strin
 
   try {
     const jobRef = doc(adminDb, 'jobs', jobId);
-    await updateDoc(jobRef, {
+    const updatedData = {
       title,
       description,
       category,
       additionalQuestions: additionalQuestions?.split('\n').filter(q => q.trim() !== '') || [],
-    });
+    };
+    await updateDoc(jobRef, updatedData);
+    
     revalidatePath('/volunteer');
     revalidatePath('/admin');
-    return { success: "Job updated successfully." };
+    
+    const updatedJob: Job = { id: jobId, ...updatedData };
+    return { success: "Job updated successfully.", job: updatedJob };
   } catch (error) {
     return { error: 'Failed to update job.' };
   }

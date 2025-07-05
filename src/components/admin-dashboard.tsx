@@ -48,14 +48,20 @@ export default function AdminDashboard({ initialJobs, token }: AdminDashboardPro
     }
   };
 
-  const onFormSubmit = (job: Job) => {
-    if (selectedJob) {
-      // Update
-      setJobs(jobs.map((j) => (j.id === job.id ? job : j)));
+  const onFormSubmit = (submittedJob: Job) => {
+    const jobExists = jobs.some((j) => j.id === submittedJob.id);
+    let newJobs;
+    if (jobExists) {
+      // Update existing job
+      newJobs = jobs.map((j) => (j.id === submittedJob.id ? submittedJob : j));
     } else {
-      // Add
-      setJobs([...jobs, job]);
+      // Add new job
+      newJobs = [...jobs, submittedJob];
     }
+    // Re-sort the list by title to maintain consistency with initial fetch
+    newJobs.sort((a, b) => a.title.localeCompare(b.title));
+    setJobs(newJobs);
+    setSelectedJob(null);
   };
 
   return (
