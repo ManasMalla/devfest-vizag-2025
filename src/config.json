@@ -2,10 +2,9 @@
   "navigation": {
     "home": true,
     "volunteer": true,
-    "sessions": true,
-    "speakers": true,
-    "sponsors": true,
-    "codeOfConduct": true
+    "sessions": false,
+    "speakers": false,
+    "sponsors": false  
   },
   "socials": {
     "instagram": "https://instagram.com/gdg_vizag",

@@ -20,10 +20,9 @@ const allNavLinks = [
   { key: 'sponsors', href: '/sponsors', label: 'Sponsors' },
 ] as const;
 
-const navLinks = allNavLinks.filter(link => config.navigation[link.key]);
-
 export function Header() {
   const pathname = usePathname();
+  const navLinks = allNavLinks.filter(link => (config.navigation as any)[link.key]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
