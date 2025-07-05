@@ -83,7 +83,7 @@ export async function addJob(formData: FormData, token?: string) {
       title,
       description,
       category,
-      additionalQuestions: additionalQuestions?.split('\n').filter(q => q.trim() !== '') || [],
+      additionalQuestions: additionalQuestions?.split('\n').map(q => q.trim()).filter(Boolean) || [],
     };
     const newDocRef = await adminDb.collection('jobs').add(jobData);
     
@@ -120,7 +120,7 @@ export async function updateJob(jobId: string, formData: FormData, token?: strin
       title,
       description,
       category,
-      additionalQuestions: additionalQuestions?.split('\n').filter(q => q.trim() !== '') || [],
+      additionalQuestions: additionalQuestions?.split('\n').map(q => q.trim()).filter(Boolean) || [],
     };
     await jobRef.update(updatedData);
     
