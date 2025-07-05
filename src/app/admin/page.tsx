@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
-import { getJobs, isAdmin } from "@/app/volunteer/actions";
+import { getJobs, isAdmin, getApplications } from "@/app/volunteer/actions";
 import AdminDashboard from "@/components/admin-dashboard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Terminal } from "lucide-react";
-import type { Job } from '@/types';
+import type { Job, ClientJobApplication } from '@/types';
 
 export default function AdminPage() {
   const [user, loading] = useAuthState(auth);
@@ -17,6 +17,7 @@ export default function AdminPage() {
     token: ''
   });
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [applications, setApplications] = useState<ClientJobApplication[]>([]);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -25,8 +26,12 @@ export default function AdminPage() {
           const idToken = await user.getIdToken();
           const adminCheck = await isAdmin(idToken);
           if (adminCheck.isAdmin) {
-            const initialJobs = await getJobs();
+            const [initialJobs, initialApplications] = await Promise.all([
+              getJobs(),
+              getApplications(idToken)
+            ]);
             setJobs(initialJobs);
+            setApplications(initialApplications);
             setStatus({ isLoading: false, isAuthorized: true, token: idToken });
           } else {
             setStatus({ isLoading: false, isAuthorized: false, token: '' });
@@ -73,10 +78,14 @@ export default function AdminPage() {
           Admin Dashboard
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Manage volunteer and lead job postings.
+          Manage job postings and view applications.
         </p>
       </div>
-      <AdminDashboard initialJobs={jobs} token={status.token} />
+      <AdminDashboard 
+        initialJobs={jobs}
+        initialApplications={applications}
+        token={status.token}
+      />
     </div>
   );
 }

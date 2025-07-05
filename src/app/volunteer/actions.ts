@@ -1,7 +1,7 @@
 'use server';
 
 import { adminDb, adminAuth } from '@/lib/firebase-admin';
-import type { Job, JobApplication } from '@/types';
+import type { Job, JobApplication, ApplicationStatus, ClientJobApplication } from '@/types';
 import { FieldValue } from 'firebase-admin/firestore';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -66,12 +66,12 @@ export async function getJobs(): Promise<Job[]> {
 }
 
 export async function addJob(formData: FormData, token?: string) {
-  const adminCheck = await isAdmin(token);
-  if (!adminCheck.isAdmin) {
-    return { error: "Unauthorized" };
-  }
-
   try {
+    const adminCheck = await isAdmin(token);
+    if (!adminCheck.isAdmin) {
+      return { error: "Unauthorized" };
+    }
+
     const rawData = Object.fromEntries(formData.entries());
     const validatedData = JobSchema.parse(rawData);
     
@@ -102,12 +102,12 @@ export async function addJob(formData: FormData, token?: string) {
 }
 
 export async function updateJob(jobId: string, formData: FormData, token?: string) {
-  const adminCheck = await isAdmin(token);
-  if (!adminCheck.isAdmin) {
-    return { error: "Unauthorized" };
-  }
-
   try {
+    const adminCheck = await isAdmin(token);
+    if (!adminCheck.isAdmin) {
+      return { error: "Unauthorized" };
+    }
+    
     const rawData = Object.fromEntries(formData.entries());
     const validatedData = JobSchema.parse(rawData);
     
@@ -138,12 +138,12 @@ export async function updateJob(jobId: string, formData: FormData, token?: strin
 }
 
 export async function deleteJob(jobId: string, token?: string) {
-  const adminCheck = await isAdmin(token);
-  if (!adminCheck.isAdmin) {
-    return { error: "Unauthorized" };
-  }
-
   try {
+    const adminCheck = await isAdmin(token);
+    if (!adminCheck.isAdmin) {
+      return { error: "Unauthorized" };
+    }
+
     await adminDb.collection('jobs').doc(jobId).delete();
     revalidatePath('/volunteer');
     revalidatePath('/admin');
@@ -158,12 +158,12 @@ export async function deleteJob(jobId: string, token?: string) {
 
 // Application actions
 export async function submitApplication(formData: FormData, token?: string) {
-  const uid = await getVerifiedUid(token);
-  if (!uid) {
-    return { error: 'You must be signed in to apply.' };
-  }
-
   try {
+    const uid = await getVerifiedUid(token);
+    if (!uid) {
+      return { error: 'You must be signed in to apply.' };
+    }
+
     const rawData: {[k: string]: any} = {};
     formData.forEach((value, key) => {
       if (key.startsWith('answer-')) {
@@ -178,17 +178,16 @@ export async function submitApplication(formData: FormData, token?: string) {
 
     const userRecord = await adminAuth.getUser(uid);
 
-    const applicationData: Omit<JobApplication, 'id' | 'submittedAt'> = {
+    const applicationData = {
       ...validatedData,
       userId: uid,
       userEmail: userRecord.email!,
       answers: validatedData.answers || {},
+      status: 'Applied' as const,
+      submittedAt: FieldValue.serverTimestamp(),
     };
 
-    await adminDb.collection('applications').add({
-      ...applicationData,
-      submittedAt: FieldValue.serverTimestamp(),
-    });
+    await adminDb.collection('applications').add(applicationData);
     return { success: 'Application submitted successfully!' };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -197,5 +196,54 @@ export async function submitApplication(formData: FormData, token?: string) {
     console.error("Error submitting application: ", error);
     const errorMessage = error instanceof Error ? error.message : String(error);
     return { error: `There was an error submitting your application: ${errorMessage}` };
+  }
+}
+
+export async function getApplications(token?: string): Promise<ClientJobApplication[]> {
+  try {
+    const adminCheck = await isAdmin(token);
+    if (!adminCheck.isAdmin) {
+      return [];
+    }
+    const appsCollection = adminDb.collection('applications');
+    const appSnapshot = await appsCollection.orderBy('submittedAt', 'desc').get();
+    
+    const appList = appSnapshot.docs.map(doc => {
+      const data = doc.data() as Omit<JobApplication, 'id'>;
+      const clientApp: ClientJobApplication = {
+        ...data,
+        id: doc.id,
+        submittedAt: data.submittedAt.toDate().toISOString(),
+      };
+      return clientApp;
+    });
+    
+    return appList;
+  } catch (error) {
+    console.error("Error fetching applications: ", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    // In a real app, you might want to throw an error that the client can catch and display.
+    // For now, returning an empty array on failure.
+    return [];
+  }
+}
+
+export async function updateApplicationStatus(applicationId: string, status: ApplicationStatus, token?: string) {
+  try {
+    const adminCheck = await isAdmin(token);
+    if (!adminCheck.isAdmin) {
+      return { error: "Unauthorized" };
+    }
+
+    const appRef = adminDb.collection('applications').doc(applicationId);
+    await appRef.update({ status: status });
+    
+    revalidatePath('/admin');
+    
+    return { success: `Application status updated to ${status}.` };
+  } catch (error) {
+    console.error("Error updating application status: ", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return { error: `Failed to update status: ${errorMessage}` };
   }
 }

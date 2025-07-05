@@ -8,8 +8,10 @@ export interface Job {
   additionalQuestions?: string[];
 }
 
+export type ApplicationStatus = 'Applied' | 'Shortlisted' | 'Accepted' | 'Rejected';
+
 export interface JobApplication {
-    id?: string;
+    id: string; // The firestore document ID
     jobId: string;
     jobTitle: string;
     userId: string;
@@ -19,4 +21,11 @@ export interface JobApplication {
     whatsapp: string;
     answers: Record<string, string>;
     submittedAt: Timestamp;
+    status: ApplicationStatus;
 }
+
+
+// A version of JobApplication that is safe to pass to client components
+export type ClientJobApplication = Omit<JobApplication, 'submittedAt'> & {
+  submittedAt: string; // Serialized from Timestamp
+};
