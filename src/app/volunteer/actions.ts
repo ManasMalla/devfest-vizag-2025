@@ -30,9 +30,7 @@ async function getVerifiedUid(token: string | undefined): Promise<string | null>
     const decodedToken = await adminAuth.verifyIdToken(token, true); // Check for revocation
     return decodedToken.uid;
   } catch (error) {
-    // This can happen if the token is expired or invalid.
-    // It's not necessarily a server error, so we can log it silently on the server
-    // and let the client handle the user feedback.
+    console.error("Error verifying ID token:", error);
     return null;
   }
 }
@@ -73,16 +71,12 @@ export async function addJob(formData: FormData, token?: string) {
     return { error: "Unauthorized" };
   }
 
-  const rawData = Object.fromEntries(formData.entries());
-  const validatedFields = JobSchema.safeParse(rawData);
-
-  if (!validatedFields.success) {
-    return { error: "Invalid data. " + JSON.stringify(validatedFields.error.flatten().fieldErrors) };
-  }
-  
-  const { title, description, category, additionalQuestions } = validatedFields.data;
-
   try {
+    const rawData = Object.fromEntries(formData.entries());
+    const validatedData = JobSchema.parse(rawData);
+    
+    const { title, description, category, additionalQuestions } = validatedData;
+
     const jobData = {
       title,
       description,
@@ -98,6 +92,10 @@ export async function addJob(formData: FormData, token?: string) {
 
     return { success: "Job added successfully.", job: newJob };
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { error: "Invalid data: " + JSON.stringify(error.flatten().fieldErrors) };
+    }
+    console.error("Error adding job: ", error);
     return { error: 'Failed to add job.' };
   }
 }
@@ -108,16 +106,12 @@ export async function updateJob(jobId: string, formData: FormData, token?: strin
     return { error: "Unauthorized" };
   }
 
-  const rawData = Object.fromEntries(formData.entries());
-   const validatedFields = JobSchema.safeParse(rawData);
-
-  if (!validatedFields.success) {
-    return { error: "Invalid data." };
-  }
-  
-  const { title, description, category, additionalQuestions } = validatedFields.data;
-
   try {
+    const rawData = Object.fromEntries(formData.entries());
+    const validatedData = JobSchema.parse(rawData);
+    
+    const { title, description, category, additionalQuestions } = validatedData;
+
     const jobRef = doc(adminDb, 'jobs', jobId);
     const updatedData = {
       title,
@@ -133,6 +127,10 @@ export async function updateJob(jobId: string, formData: FormData, token?: strin
     const updatedJob: Job = { id: jobId, ...updatedData };
     return { success: "Job updated successfully.", job: updatedJob };
   } catch (error) {
+     if (error instanceof z.ZodError) {
+      return { error: "Invalid data: " + JSON.stringify(error.flatten().fieldErrors) };
+    }
+    console.error("Error updating job: ", error);
     return { error: 'Failed to update job.' };
   }
 }
@@ -149,6 +147,7 @@ export async function deleteJob(jobId: string, token?: string) {
     revalidatePath('/admin');
     return { success: "Job deleted successfully." };
   } catch (error) {
+    console.error("Error deleting job: ", error);
     return { error: 'Failed to delete job.' };
   }
 }
@@ -161,30 +160,26 @@ export async function submitApplication(formData: FormData, token?: string) {
     return { error: 'You must be signed in to apply.' };
   }
 
-  const rawData: {[k: string]: any} = {};
-  formData.forEach((value, key) => {
-    if (key.startsWith('answer-')) {
-        if (!rawData.answers) rawData.answers = {};
-        rawData.answers[key.replace('answer-', '')] = value;
-    } else {
-        rawData[key] = value;
-    }
-  });
-
-  const validatedFields = ApplicationSchema.safeParse(rawData);
-
-  if (!validatedFields.success) {
-    return { error: "Invalid data: " + JSON.stringify(validatedFields.error.flatten().fieldErrors) };
-  }
-
   try {
+    const rawData: {[k: string]: any} = {};
+    formData.forEach((value, key) => {
+      if (key.startsWith('answer-')) {
+          if (!rawData.answers) rawData.answers = {};
+          rawData.answers[key.replace('answer-', '')] = value;
+      } else {
+          rawData[key] = value;
+      }
+    });
+
+    const validatedData = ApplicationSchema.parse(rawData);
+
     const userRecord = await adminAuth.getUser(uid);
 
     const applicationData: Omit<JobApplication, 'id' | 'submittedAt'> = {
-      ...validatedFields.data,
+      ...validatedData,
       userId: uid,
       userEmail: userRecord.email!,
-      answers: validatedFields.data.answers || {},
+      answers: validatedData.answers || {},
     };
 
     await addDoc(collection(adminDb, 'applications'), {
@@ -193,6 +188,9 @@ export async function submitApplication(formData: FormData, token?: string) {
     });
     return { success: 'Application submitted successfully!' };
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { error: "Invalid data: " + JSON.stringify(error.flatten().fieldErrors) };
+    }
     console.error("Error submitting application: ", error);
     return { error: 'There was an error submitting your application.' };
   }
