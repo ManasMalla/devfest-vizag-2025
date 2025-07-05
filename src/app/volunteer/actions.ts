@@ -2,9 +2,11 @@
 
 import { adminDb, adminAuth } from '@/lib/firebase-admin';
 import type { Job, JobApplication, ApplicationStatus, ClientJobApplication } from '@/types';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, type Query } from 'firebase-admin/firestore';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+
+const ITEMS_PER_PAGE = 10;
 
 // Zod schemas for validation
 const JobSchema = z.object({
@@ -199,34 +201,72 @@ export async function submitApplication(formData: FormData, token?: string) {
   }
 }
 
-export async function getApplications(token?: string): Promise<ClientJobApplication[]> {
+export async function getApplications(
+  token: string | undefined,
+  filters: { status: ApplicationStatus | 'All'; jobTitle: string | 'All' },
+  pagination: { limit: number; startAfterDocId?: string }
+): Promise<{ applications: ClientJobApplication[]; nextCursor: string | null }> {
+  const adminCheck = await isAdmin(token);
+  if (!adminCheck.isAdmin) {
+    return { applications: [], nextCursor: null };
+  }
+  
   try {
-    const adminCheck = await isAdmin(token);
-    if (!adminCheck.isAdmin) {
-      return [];
+    let query: Query = adminDb.collection('applications');
+
+    if (filters.status !== 'All') {
+      query = query.where('status', '==', filters.status);
     }
-    const appsCollection = adminDb.collection('applications');
-    const appSnapshot = await appsCollection.orderBy('submittedAt', 'desc').get();
+    if (filters.jobTitle !== 'All') {
+      query = query.where('jobTitle', '==', filters.jobTitle);
+    }
+
+    query = query.orderBy('submittedAt', 'desc');
+
+    if (pagination.startAfterDocId) {
+      const startAfterDoc = await adminDb.collection('applications').doc(pagination.startAfterDocId).get();
+      if (startAfterDoc.exists) {
+        query = query.startAfter(startAfterDoc);
+      }
+    }
+
+    const appSnapshot = await query.limit(pagination.limit).get();
     
-    const appList = appSnapshot.docs.map(doc => {
-      const data = doc.data() as Omit<JobApplication, 'id'>;
+    const applications = appSnapshot.docs.map(doc => {
+      const data = doc.data();
       const clientApp: ClientJobApplication = {
-        ...data,
         id: doc.id,
+        jobId: data.jobId,
+        jobTitle: data.jobTitle,
+        userId: data.userId,
+        userEmail: data.userEmail,
+        fullName: data.fullName,
+        phone: data.phone,
+        whatsapp: data.whatsapp,
+        answers: data.answers,
         submittedAt: data.submittedAt.toDate().toISOString(),
+        status: data.status,
       };
       return clientApp;
     });
-    
-    return appList;
-  } catch (error) {
+
+    const lastVisible = appSnapshot.docs[appSnapshot.docs.length - 1];
+    const nextCursor = lastVisible ? lastVisible.id : null;
+
+    return { applications, nextCursor };
+  } catch (error: any) {
     console.error("Error fetching applications: ", error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    // In a real app, you might want to throw an error that the client can catch and display.
-    // For now, returning an empty array on failure.
-    return [];
+    // This specific error code indicates a missing composite index in Firestore.
+    // The console will provide a direct link to create it.
+    if (error.code === 'failed-precondition') {
+      console.error(
+        'Firestore query failed. This likely means you need to create a composite index in your Firebase console. The required index will include the fields you are filtering and ordering by (e.g., status, jobTitle, submittedAt).'
+      );
+    }
+    return { applications: [], nextCursor: null };
   }
 }
+
 
 export async function updateApplicationStatus(applicationId: string, status: ApplicationStatus, token?: string) {
   try {

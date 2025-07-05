@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { format } from 'date-fns';
 import {
   Table,
@@ -18,48 +18,93 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { MoreHorizontal, Loader2 } from 'lucide-react';
-import type { ClientJobApplication, ApplicationStatus } from '@/types';
-import { updateApplicationStatus } from '@/app/volunteer/actions';
+import type { ClientJobApplication, ApplicationStatus, Job } from '@/types';
+import { updateApplicationStatus, getApplications } from '@/app/volunteer/actions';
 import { useToast } from '@/hooks/use-toast';
 import { ApplicationDetailsDialog } from './application-details-dialog';
+import { Skeleton } from './ui/skeleton';
+
+const ITEMS_PER_PAGE = 10;
+const statusFilters: (ApplicationStatus | 'All')[] = ['All', 'Applied', 'Shortlisted', 'Accepted', 'Rejected'];
 
 interface ApplicationsListProps {
   initialApplications: ClientJobApplication[];
+  initialNextCursor: string | null;
+  jobs: Job[];
   token: string;
 }
 
-const statusFilters: (ApplicationStatus | 'All')[] = ['All', 'Applied', 'Shortlisted', 'Accepted', 'Rejected'];
-
 const getAvailableActions = (status: ApplicationStatus): ApplicationStatus[] => {
   switch (status) {
-    case 'Applied':
-      return ['Shortlisted', 'Rejected'];
-    case 'Shortlisted':
-      return ['Accepted', 'Rejected'];
-    case 'Rejected':
-      return ['Applied', 'Shortlisted'];
-    case 'Accepted':
-      return []; // No further actions
-    default:
-      return [];
+    case 'Applied': return ['Shortlisted', 'Rejected'];
+    case 'Shortlisted': return ['Accepted', 'Rejected'];
+    case 'Rejected': return ['Applied', 'Shortlisted'];
+    case 'Accepted': return [];
+    default: return [];
   }
 };
 
-export function ApplicationsList({ initialApplications, token }: ApplicationsListProps) {
+export function ApplicationsList({ initialApplications, initialNextCursor, jobs, token }: ApplicationsListProps) {
   const [applications, setApplications] = useState<ClientJobApplication[]>(initialApplications);
-  const [filter, setFilter] = useState<ApplicationStatus | 'All'>('All');
+  const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'All'>('All');
+  const [jobTitleFilter, setJobTitleFilter] = useState<string | 'All'>('All');
+  
+  const [isLoading, setIsLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  
+  const [prevCursors, setPrevCursors] = useState<(string | undefined)[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
+
   const [selectedApp, setSelectedApp] = useState<ClientJobApplication | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const { toast } = useToast();
 
-  const filteredApplications = useMemo(() => {
-    if (filter === 'All') {
-      return applications;
+  const fetchApps = async (cursor: string | undefined, direction: 'next' | 'prev' | 'reset') => {
+    setIsLoading(true);
+    try {
+      const result = await getApplications(
+        token,
+        { status: statusFilter, jobTitle: jobTitleFilter },
+        { limit: ITEMS_PER_PAGE, startAfterDocId: cursor }
+      );
+      setApplications(result.applications);
+      setNextCursor(result.nextCursor);
+
+      if (direction === 'next') {
+        setPrevCursors(prev => [...prev, cursor]);
+      } else if (direction === 'prev') {
+        setPrevCursors(prev => prev.slice(0, -1));
+      } else if (direction === 'reset') {
+        setPrevCursors([]);
+      }
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch applications. A composite index in Firestore may be required.' });
+    } finally {
+      setIsLoading(false);
     }
-    return applications.filter((app) => app.status === filter);
-  }, [applications, filter]);
+  };
+
+  const handleStatusFilterChange = (value: ApplicationStatus | 'All') => {
+    setStatusFilter(value);
+    setApplications([]); // Clear current view
+    setJobTitleFilter(jobTitleFilter);
+    fetchApps(undefined, 'reset');
+  };
+
+  const handleJobFilterChange = (value: string | 'All') => {
+    setJobTitleFilter(value);
+    setApplications([]); // Clear current view
+    setStatusFilter(statusFilter);
+    fetchApps(undefined, 'reset');
+  };
 
   const handleViewDetails = (application: ClientJobApplication) => {
     setSelectedApp(application);
@@ -85,33 +130,39 @@ export function ApplicationsList({ initialApplications, token }: ApplicationsLis
 
   const getBadgeVariant = (status: ApplicationStatus) => {
     switch (status) {
-      case 'Accepted':
-        return 'default';
-      case 'Shortlisted':
-        return 'secondary';
-      case 'Rejected':
-        return 'destructive';
-      case 'Applied':
-        return 'outline';
-      default:
-        return 'outline';
+      case 'Accepted': return 'default';
+      case 'Shortlisted': return 'secondary';
+      case 'Rejected': return 'destructive';
+      case 'Applied': return 'outline';
+      default: return 'outline';
     }
   };
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-4">
-        <p className="text-sm font-medium">Filter by status:</p>
-        {statusFilters.map((status) => (
-          <Button
-            key={status}
-            variant={filter === status ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilter(status)}
-          >
-            {status}
-          </Button>
-        ))}
+      <div className="flex flex-col sm:flex-row items-center gap-2 mb-4">
+        <p className="text-sm font-medium">Filter by:</p>
+        <Select onValueChange={handleStatusFilterChange} defaultValue="All">
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            {statusFilters.map((status) => (
+              <SelectItem key={status} value={status}>{status}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select onValueChange={handleJobFilterChange} defaultValue="All">
+          <SelectTrigger className="w-full sm:w-[280px]">
+            <SelectValue placeholder="Job Title" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="All">All Jobs</SelectItem>
+            {jobs.map((job) => (
+              <SelectItem key={job.id} value={job.title}>{job.title}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="rounded-lg border">
         <Table>
@@ -125,8 +176,16 @@ export function ApplicationsList({ initialApplications, token }: ApplicationsLis
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredApplications.length > 0 ? (
-              filteredApplications.map((app) => (
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                 <TableRow key={`skel-${i}`}>
+                    <TableCell colSpan={5}>
+                        <Skeleton className="h-10 w-full" />
+                    </TableCell>
+                </TableRow>
+              ))
+            ) : applications.length > 0 ? (
+              applications.map((app) => (
                 <TableRow key={app.id} onClick={() => handleViewDetails(app)} className="cursor-pointer">
                   <TableCell>
                     <div className="font-medium">{app.fullName}</div>
@@ -150,10 +209,7 @@ export function ApplicationsList({ initialApplications, token }: ApplicationsLis
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                           {getAvailableActions(app.status).map((action) => (
-                            <DropdownMenuItem
-                              key={action}
-                              onClick={(e) => handleStatusUpdate(app.id, action, e)}
-                            >
+                            <DropdownMenuItem key={action} onClick={(e) => handleStatusUpdate(app.id, action, e)}>
                               {action}
                             </DropdownMenuItem>
                           ))}
@@ -169,12 +225,30 @@ export function ApplicationsList({ initialApplications, token }: ApplicationsLis
             ) : (
               <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
-                  No applications found for this filter.
+                  No applications found for the selected filters.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
+      </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchApps(prevCursors[prevCursors.length - 1], 'prev')}
+            disabled={prevCursors.length === 0 || isLoading}
+        >
+            Previous
+        </Button>
+        <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchApps(nextCursor!, 'next')}
+            disabled={!nextCursor || isLoading}
+        >
+            Next
+        </Button>
       </div>
       <ApplicationDetailsDialog
         application={selectedApp}

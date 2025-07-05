@@ -23,10 +23,11 @@ import { ApplicationsList } from './applications-list';
 interface AdminDashboardProps {
   initialJobs: Job[];
   initialApplications: ClientJobApplication[];
+  initialNextCursor: string | null;
   token: string;
 }
 
-export default function AdminDashboard({ initialJobs, initialApplications, token }: AdminDashboardProps) {
+export default function AdminDashboard({ initialJobs, initialApplications, initialNextCursor, token }: AdminDashboardProps) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -75,7 +76,12 @@ export default function AdminDashboard({ initialJobs, initialApplications, token
         <TabsTrigger value="jobs">Job Postings</TabsTrigger>
       </TabsList>
       <TabsContent value="applications" className="mt-6">
-        <ApplicationsList initialApplications={initialApplications} token={token} />
+        <ApplicationsList 
+          initialApplications={initialApplications}
+          initialNextCursor={initialNextCursor}
+          jobs={initialJobs}
+          token={token} 
+        />
       </TabsContent>
       <TabsContent value="jobs" className="mt-6">
         <div className="flex justify-end mb-4">

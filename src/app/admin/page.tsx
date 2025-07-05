@@ -9,6 +9,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Terminal } from "lucide-react";
 import type { Job, ClientJobApplication } from '@/types';
 
+const ITEMS_PER_PAGE = 10;
+
 export default function AdminPage() {
   const [user, loading] = useAuthState(auth);
   const [status, setStatus] = useState({
@@ -18,6 +20,7 @@ export default function AdminPage() {
   });
   const [jobs, setJobs] = useState<Job[]>([]);
   const [applications, setApplications] = useState<ClientJobApplication[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -26,12 +29,13 @@ export default function AdminPage() {
           const idToken = await user.getIdToken();
           const adminCheck = await isAdmin(idToken);
           if (adminCheck.isAdmin) {
-            const [initialJobs, initialApplications] = await Promise.all([
+            const [initialJobs, initialApplicationsData] = await Promise.all([
               getJobs(),
-              getApplications(idToken)
+              getApplications(idToken, { status: 'All', jobTitle: 'All' }, { limit: ITEMS_PER_PAGE })
             ]);
             setJobs(initialJobs);
-            setApplications(initialApplications);
+            setApplications(initialApplicationsData.applications);
+            setNextCursor(initialApplicationsData.nextCursor);
             setStatus({ isLoading: false, isAuthorized: true, token: idToken });
           } else {
             setStatus({ isLoading: false, isAuthorized: false, token: '' });
@@ -84,6 +88,7 @@ export default function AdminPage() {
       <AdminDashboard 
         initialJobs={jobs}
         initialApplications={applications}
+        initialNextCursor={nextCursor}
         token={status.token}
       />
     </div>
