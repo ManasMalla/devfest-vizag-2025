@@ -212,6 +212,23 @@ export async function getApplications(
   }
   
   try {
+    // NOTE ON FIRESTORE INDEXES:
+    // This query logic can generate several different query shapes depending on the
+    // filters selected by the user. To ensure all combinations work correctly,
+    // you must create the following composite indexes in your Firestore database.
+    // The Firestore console will often provide a direct link to create a missing
+    // index in the error logs.
+    //
+    // 1. To filter by status AND job title (and to filter by status only):
+    //    - Collection: applications
+    //    - Fields: status (Ascending), submittedAt (Descending)
+    //
+    // 2. To filter by job title ONLY:
+    //    - Collection: applications
+    //    - Fields: jobTitle (Ascending), submittedAt (Descending)
+    //
+    // If these indexes are missing, Firestore may return empty results without an error.
+
     let query: Query = adminDb.collection('applications');
 
     if (filters.status !== 'All') {
