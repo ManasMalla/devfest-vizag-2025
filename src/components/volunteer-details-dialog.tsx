@@ -57,11 +57,11 @@ export function VolunteerDetailsDialog({ isOpen, onOpenChange, volunteer, teams,
     setCurrentTeamName(team?.name || '');
   }, [volunteer, teams]);
 
-  const handleUpdate = async (updateAction: () => Promise<{ success?: boolean, error?: string }>, successMessage: string) => {
+  const handleUpdate = async (updateAction: (token: string) => Promise<{ success?: boolean, error?: string }>, successMessage: string) => {
     if (!token) return;
     setIsUpdating(true);
     const resolvedToken = await token;
-    const result = await updateAction();
+    const result = await updateAction(resolvedToken);
     if (result.error) {
         toast({ variant: 'destructive', title: 'Error', description: result.error });
     } else {
@@ -71,26 +71,26 @@ export function VolunteerDetailsDialog({ isOpen, onOpenChange, volunteer, teams,
     setIsUpdating(false);
   };
   
-  const handleTeamChange = async (newTeamId: string) => {
+  const handleTeamChange = (newTeamId: string) => {
     const finalTeamId = newTeamId === 'unassigned' ? null : newTeamId;
     setTeamId(finalTeamId);
     handleUpdate(
-        () => assignVolunteerTeam(volunteer.id, finalTeamId, (token ? await token : '')),
+        (resolvedToken) => assignVolunteerTeam(volunteer.id, finalTeamId, resolvedToken),
         `${volunteer.fullName} assigned to a new team.`
     );
   };
 
-  const handleLeadToggle = async (checked: boolean) => {
+  const handleLeadToggle = (checked: boolean) => {
     setIsLead(checked);
     handleUpdate(
-        () => updateVolunteerLeadStatus(volunteer.id, checked, (token ? await token : '')),
+        (resolvedToken) => updateVolunteerLeadStatus(volunteer.id, checked, resolvedToken),
         `Lead status for ${volunteer.fullName} updated.`
     );
   };
 
-  const handleDeleteTeam = async (teamIdToDelete: string) => {
+  const handleDeleteTeam = (teamIdToDelete: string) => {
     handleUpdate(
-        () => deleteTeam(teamIdToDelete, (token ? await token : '')),
+        (resolvedToken) => deleteTeam(teamIdToDelete, resolvedToken),
         `Team deleted successfully.`
     );
     if(volunteer.teamId === teamIdToDelete) {
@@ -98,11 +98,11 @@ export function VolunteerDetailsDialog({ isOpen, onOpenChange, volunteer, teams,
     }
   };
 
-  const handleRenameTeam = async (e: React.FormEvent) => {
+  const handleRenameTeam = (e: React.FormEvent) => {
     e.preventDefault();
     if (!teamId || !currentTeamName) return;
      handleUpdate(
-        () => manageTeam({ id: teamId, name: currentTeamName }, (token ? await token : '')),
+        (resolvedToken) => manageTeam({ id: teamId, name: currentTeamName }, resolvedToken),
         `Team renamed to "${currentTeamName}".`
     );
     setIsEditingTeamName(false);
