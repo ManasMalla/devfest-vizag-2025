@@ -36,6 +36,7 @@ interface ApplicationDialogProps {
   job: Job;
   user: User | null | undefined;
   children: React.ReactNode;
+  onApplicationSubmitted?: () => void;
 }
 
 const ApplicationSchema = z.object({
@@ -44,7 +45,7 @@ const ApplicationSchema = z.object({
   whatsapp: z.string().min(10, "A valid WhatsApp number is required"),
 });
 
-export function ApplicationDialog({ job, user, children }: ApplicationDialogProps) {
+export function ApplicationDialog({ job, user, children, onApplicationSubmitted }: ApplicationDialogProps) {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,6 +89,7 @@ export function ApplicationDialog({ job, user, children }: ApplicationDialogProp
         title: 'Application Submitted!',
         description: "We've received your application and will be in touch soon.",
       });
+      onApplicationSubmitted?.();
       setIsOpen(false);
       form.reset();
     } else {

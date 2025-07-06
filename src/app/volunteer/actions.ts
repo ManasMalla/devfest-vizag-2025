@@ -204,6 +204,23 @@ export async function submitApplication(formData: FormData, token?: string) {
 
     const validatedData = ApplicationSchema.parse(rawData);
 
+    // Check if job is open
+    const jobDoc = await adminDb.collection('jobs').doc(validatedData.jobId).get();
+    if (!jobDoc.exists || (jobDoc.data()?.status === 'closed')) {
+        return { error: 'This job is no longer open for applications.' };
+    }
+
+    // Check if user has already applied
+    const existingApplication = await adminDb.collection('applications')
+        .where('userId', '==', uid)
+        .where('jobId', '==', validatedData.jobId)
+        .limit(1)
+        .get();
+
+    if (!existingApplication.empty) {
+        return { error: 'You have already applied for this job.' };
+    }
+
     const userRecord = await adminAuth.getUser(uid);
 
     const applicationData = {
@@ -216,6 +233,7 @@ export async function submitApplication(formData: FormData, token?: string) {
     };
 
     await adminDb.collection('applications').add(applicationData);
+    revalidatePath('/volunteer');
     return { success: 'Application submitted successfully!' };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -224,6 +242,38 @@ export async function submitApplication(formData: FormData, token?: string) {
     console.error("Error submitting application: ", error);
     const errorMessage = error instanceof Error ? error.message : String(error);
     return { error: `There was an error submitting your application: ${errorMessage}` };
+  }
+}
+
+export async function getUserApplications(token: string | undefined): Promise<ClientJobApplication[]> {
+  const uid = await getVerifiedUid(token);
+  if (!uid) {
+    return [];
+  }
+
+  try {
+    const appSnapshot = await adminDb.collection('applications').where('userId', '==', uid).orderBy('submittedAt', 'desc').get();
+    const applications = appSnapshot.docs.map(doc => {
+      const data = doc.data();
+      const clientApp: ClientJobApplication = {
+        id: doc.id,
+        jobId: data.jobId,
+        jobTitle: data.jobTitle,
+        userId: data.userId,
+        userEmail: data.userEmail,
+        fullName: data.fullName,
+        phone: data.phone,
+        whatsapp: data.whatsapp,
+        answers: data.answers,
+        submittedAt: data.submittedAt.toDate().toISOString(),
+        status: data.status,
+      };
+      return clientApp;
+    });
+    return applications;
+  } catch (error) {
+    console.error("Error fetching user applications:", error);
+    return [];
   }
 }
 
