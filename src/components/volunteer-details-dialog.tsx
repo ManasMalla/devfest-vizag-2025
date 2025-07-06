@@ -1,9 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import type { Volunteer, Team } from '@/types';
-import { useToast } from '@/hooks/use-toast';
-import { assignVolunteerTeam, updateVolunteerLeadStatus, deleteTeam, manageTeam } from '@/app/volunteer/dashboard/actions';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,22 +10,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Loader2, Mail, Phone, Briefcase, Users, Crown, Trash2, Pencil } from 'lucide-react';
-import { Separator } from './ui/separator';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
-import { Input } from './ui/input';
+import { Mail, Phone, Briefcase, Users, Crown } from 'lucide-react';
 
 interface VolunteerDetailsDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   volunteer: Volunteer;
   teams: Team[];
-  isAdmin: boolean;
-  token: Promise<string> | undefined;
-  onFormSubmit: () => void;
 }
 
 const DetailItem = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | React.ReactNode }) => (
@@ -41,72 +29,7 @@ const DetailItem = ({ icon: Icon, label, value }: { icon: React.ElementType, lab
     </div>
 );
 
-export function VolunteerDetailsDialog({ isOpen, onOpenChange, volunteer, teams, isAdmin, token, onFormSubmit }: VolunteerDetailsDialogProps) {
-  const [teamId, setTeamId] = useState<string | null>(volunteer.teamId || null);
-  const [isLead, setIsLead] = useState(volunteer.isLead || false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [currentTeamName, setCurrentTeamName] = useState('');
-  const [isEditingTeamName, setIsEditingTeamName] = useState(false);
-
-  const { toast } = useToast();
-
-  useEffect(() => {
-    setTeamId(volunteer.teamId || null);
-    setIsLead(volunteer.isLead || false);
-    const team = teams.find(t => t.id === volunteer.teamId);
-    setCurrentTeamName(team?.name || '');
-  }, [volunteer, teams]);
-
-  const handleUpdate = async (updateAction: (token: string) => Promise<{ success?: boolean, error?: string }>, successMessage: string) => {
-    if (!token) return;
-    setIsUpdating(true);
-    const resolvedToken = await token;
-    const result = await updateAction(resolvedToken);
-    if (result.error) {
-        toast({ variant: 'destructive', title: 'Error', description: result.error });
-    } else {
-        toast({ title: 'Success', description: successMessage });
-        onFormSubmit(); // Refetch data on the parent
-    }
-    setIsUpdating(false);
-  };
-  
-  const handleTeamChange = (newTeamId: string) => {
-    const finalTeamId = newTeamId === 'unassigned' ? null : newTeamId;
-    setTeamId(finalTeamId);
-    handleUpdate(
-        (resolvedToken) => assignVolunteerTeam(volunteer.id, finalTeamId, resolvedToken),
-        `${volunteer.fullName} assigned to a new team.`
-    );
-  };
-
-  const handleLeadToggle = (checked: boolean) => {
-    setIsLead(checked);
-    handleUpdate(
-        (resolvedToken) => updateVolunteerLeadStatus(volunteer.id, checked, resolvedToken),
-        `Lead status for ${volunteer.fullName} updated.`
-    );
-  };
-
-  const handleDeleteTeam = (teamIdToDelete: string) => {
-    handleUpdate(
-        (resolvedToken) => deleteTeam(teamIdToDelete, resolvedToken),
-        `Team deleted successfully.`
-    );
-    if(volunteer.teamId === teamIdToDelete) {
-        setTeamId(null);
-    }
-  };
-
-  const handleRenameTeam = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!teamId || !currentTeamName) return;
-     handleUpdate(
-        (resolvedToken) => manageTeam({ id: teamId, name: currentTeamName }, resolvedToken),
-        `Team renamed to "${currentTeamName}".`
-    );
-    setIsEditingTeamName(false);
-  }
+export function VolunteerDetailsDialog({ isOpen, onOpenChange, volunteer, teams }: VolunteerDetailsDialogProps) {
 
   const volunteerTeam = teams.find(t => t.id === volunteer.teamId);
 
@@ -121,68 +44,12 @@ export function VolunteerDetailsDialog({ isOpen, onOpenChange, volunteer, teams,
           <DialogDescription>Volunteer Details</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
-            <DetailItem icon={Mail} label="Email" value={volunteer.email} />
-            <DetailItem icon={Phone} label="Phone" value={volunteer.phone} />
+            <DetailItem icon={Mail} label="Email" value={<a href={`mailto:${volunteer.email}`} className="hover:underline">{volunteer.email}</a>} />
+            <DetailItem icon={Phone} label="Phone" value={<a href={`tel:${volunteer.phone}`} className="hover:underline">{volunteer.phone}</a>} />
             <DetailItem icon={Briefcase} label="Accepted Role" value={volunteer.jobTitle} />
             <DetailItem icon={Users} label="Current Team" value={volunteerTeam?.name || 'Unassigned'} />
         </div>
-
-        {isAdmin && (
-          <>
-            <Separator />
-            <div className="space-y-4 pt-4">
-              <h3 className="text-base font-semibold">Admin Controls</h3>
-              <div className="space-y-2">
-                <Label htmlFor="team-assignment">Assign to Team</Label>
-                <div className="flex items-center gap-2">
-                  <Select onValueChange={handleTeamChange} value={teamId || 'unassigned'} disabled={isUpdating}>
-                      <SelectTrigger id="team-assignment">
-                          <SelectValue placeholder="Select a team" />
-                      </SelectTrigger>
-                      <SelectContent>
-                          <SelectItem value="unassigned">Unassigned</SelectItem>
-                          {teams.map(t => (
-                              <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                          ))}
-                      </SelectContent>
-                  </Select>
-                  {teamId && !isEditingTeamName && (
-                    <>
-                        <Button variant="outline" size="icon" onClick={() => setIsEditingTeamName(true)}><Pencil className="h-4 w-4" /></Button>
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="destructive" size="icon"><Trash2 className="h-4 w-4" /></Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader><AlertDialogTitle>Delete Team?</AlertDialogTitle></AlertDialogHeader>
-                                <AlertDialogDescription>
-                                    This will permanently delete the "{currentTeamName}" team and unassign all its members. This action cannot be undone.
-                                </AlertDialogDescription>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDeleteTeam(teamId)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </>
-                  )}
-                </div>
-                {isEditingTeamName && teamId && (
-                    <form onSubmit={handleRenameTeam} className="flex items-center gap-2 mt-2">
-                        <Input value={currentTeamName} onChange={e => setCurrentTeamName(e.target.value)} />
-                        <Button type="submit">Save</Button>
-                        <Button type="button" variant="ghost" onClick={() => setIsEditingTeamName(false)}>Cancel</Button>
-                    </form>
-                )}
-              </div>
-              <div className="flex items-center space-x-2">
-                  <Switch id="is-lead" checked={isLead} onCheckedChange={handleLeadToggle} disabled={isUpdating} />
-                  <Label htmlFor="is-lead">Team Lead</Label>
-              </div>
-               {isUpdating && <Loader2 className="h-4 w-4 animate-spin" />}
-            </div>
-          </>
-        )}
+        
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>Close</Button>
         </DialogFooter>

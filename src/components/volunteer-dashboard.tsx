@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import type { Team, Volunteer, UserRole } from '@/types';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
-import { getDashboardData, manageTeam } from '@/app/volunteer/dashboard/actions';
-import { Loader2, Plus, Users, Crown, Phone, Mail } from 'lucide-react';
+import { getDashboardData, manageTeam, assignVolunteerTeam, updateVolunteerLeadStatus } from '@/app/volunteer/dashboard/actions';
+import { Loader2, Plus, Users, Crown, Phone } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -15,6 +15,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from './ui/dialog';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function VolunteerDashboard() {
     const [user, loading] = useAuthState(auth);
@@ -27,6 +30,7 @@ export default function VolunteerDashboard() {
     const [isTeamFormOpen, setIsTeamFormOpen] = useState(false);
     const [teamName, setTeamName] = useState('');
     const [isSubmittingTeam, setIsSubmittingTeam] = useState(false);
+    const [updatingState, setUpdatingState] = useState<{ id: string; type: 'team' | 'lead' } | null>(null);
     const { toast } = useToast();
 
     const fetchData = async () => {
@@ -63,11 +67,6 @@ export default function VolunteerDashboard() {
         setIsDetailsOpen(true);
     };
 
-    const handleFormSubmit = () => {
-        // Refetch data when a change is made in the details dialog
-        fetchData();
-    };
-
     const handleCreateTeam = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user || !teamName) return;
@@ -84,6 +83,35 @@ export default function VolunteerDashboard() {
         }
         setIsSubmittingTeam(false);
     }
+    
+    const handleTeamChange = async (volunteerId: string, newTeamId: string) => {
+        if (!user) return;
+        setUpdatingState({ id: volunteerId, type: 'team' });
+        const token = await user.getIdToken();
+        const finalTeamId = newTeamId === 'unassigned' ? null : newTeamId;
+        const result = await assignVolunteerTeam(volunteerId, finalTeamId, token);
+        if (result.error) {
+            toast({ variant: 'destructive', title: 'Error', description: result.error });
+        } else {
+            toast({ title: 'Success', description: `Team assignment updated.` });
+            fetchData(); // Refetch to get updated lists
+        }
+        setUpdatingState(null);
+    };
+
+    const handleLeadToggle = async (volunteerId: string, isLead: boolean) => {
+        if (!user) return;
+        setUpdatingState({ id: volunteerId, type: 'lead' });
+        const token = await user.getIdToken();
+        const result = await updateVolunteerLeadStatus(volunteerId, isLead, token);
+        if (result.error) {
+            toast({ variant: 'destructive', title: 'Error', description: result.error });
+        } else {
+            toast({ title: 'Success', description: `Lead status updated.` });
+            fetchData(); // Refetch to sort leads to top
+        }
+        setUpdatingState(null);
+    };
 
     if (isLoading) {
         return <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>;
@@ -103,8 +131,90 @@ export default function VolunteerDashboard() {
 
     const { teams, volunteers } = data;
     const isAdmin = role === 'Admin';
-
     const unassignedVolunteers = volunteers.filter(v => !v.teamId);
+
+    const renderVolunteerTable = (title: string, description: string, volunteerList: Volunteer[], teamId: string | null = null) => (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Users /> {title}</CardTitle>
+                <CardDescription>{description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="rounded-lg border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Volunteer</TableHead>
+                                <TableHead>Job Title</TableHead>
+                                {isAdmin && <TableHead>Assign Team</TableHead>}
+                                {isAdmin && <TableHead>Team Lead</TableHead>}
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {volunteerList.length > 0 ? volunteerList.map(v => (
+                                <TableRow key={v.id} onClick={() => handleOpenDetails(v)} className="cursor-pointer">
+                                    <TableCell>
+                                        <div className="font-medium flex items-center gap-2">
+                                            {v.isLead && <Crown className="h-4 w-4 text-amber-500" />}
+                                            {v.fullName}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">{v.email}</div>
+                                    </TableCell>
+                                    <TableCell>{v.jobTitle}</TableCell>
+                                    {isAdmin && (
+                                        <>
+                                            <TableCell onClick={(e) => e.stopPropagation()}>
+                                                <div className="flex items-center gap-2">
+                                                    <Select 
+                                                        onValueChange={(newTeamId) => handleTeamChange(v.id, newTeamId)} 
+                                                        value={v.teamId || 'unassigned'}
+                                                        disabled={updatingState?.id === v.id}
+                                                    >
+                                                        <SelectTrigger className="w-full sm:w-[180px]">
+                                                            <SelectValue placeholder="Select a team" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="unassigned">Unassigned</SelectItem>
+                                                            {teams.map(t => (
+                                                                <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                     {updatingState?.id === v.id && updatingState?.type === 'team' && <Loader2 className="h-4 w-4 animate-spin" />}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell onClick={(e) => e.stopPropagation()}>
+                                                <div className="flex items-center gap-2">
+                                                    <Switch
+                                                        checked={v.isLead || false}
+                                                        onCheckedChange={(isChecked) => handleLeadToggle(v.id, isChecked)}
+                                                        disabled={updatingState?.id === v.id}
+                                                    />
+                                                    {updatingState?.id === v.id && updatingState?.type === 'lead' && <Loader2 className="h-4 w-4 animate-spin" />}
+                                                </div>
+                                            </TableCell>
+                                        </>
+                                    )}
+                                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                                        <Button asChild variant="outline" size="sm">
+                                            <a href={`tel:${v.phone}`}><Phone className="mr-2 h-3 w-3" /> Call</a>
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={isAdmin ? 5 : 3} className="h-24 text-center">
+                                        No volunteers here.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            </CardContent>
+        </Card>
+    );
 
     return (
         <div>
@@ -120,74 +230,17 @@ export default function VolunteerDashboard() {
                     const members = volunteers
                         .filter(v => v.teamId === team.id)
                         .sort((a, b) => (b.isLead ? 1 : 0) - (a.isLead ? 1 : 0));
-                    return (
-                        <Card key={team.id}>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2"><Users /> {team.name}</CardTitle>
-                                <CardDescription>{members.length} member(s)</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                {members.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {members.map(v => (
-                                            <div key={v.id} onClick={() => handleOpenDetails(v)} className="p-4 rounded-lg border bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors">
-                                                <div className="font-semibold flex items-center gap-2">
-                                                    {v.isLead && <Crown className="h-4 w-4 text-amber-500" />} {v.fullName}
-                                                </div>
-                                                <p className="text-sm text-muted-foreground">{v.jobTitle}</p>
-                                                <div className="flex items-center gap-4 mt-2">
-                                                    <Button asChild variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
-                                                        <a href={`tel:${v.phone}`}><Phone className="mr-2 h-3 w-3" /> Call</a>
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-sm text-muted-foreground">No volunteers in this team yet.</p>
-                                )}
-                            </CardContent>
-                        </Card>
-                    );
+                    return renderVolunteerTable(team.name, `${members.length} member(s)`, members, team.id);
                 })}
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Users /> Unassigned Volunteers</CardTitle>
-                         <CardDescription>{unassignedVolunteers.length} member(s)</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {unassignedVolunteers.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {unassignedVolunteers.map(v => (
-                                    <div key={v.id} onClick={() => handleOpenDetails(v)} className="p-4 rounded-lg border bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors">
-                                        <div className="font-semibold flex items-center gap-2">
-                                            {v.isLead && <Crown className="h-4 w-4 text-amber-500" />} {v.fullName}
-                                        </div>
-                                        <p className="text-sm text-muted-foreground">{v.jobTitle}</p>
-                                        <div className="flex items-center gap-4 mt-2">
-                                            <Button asChild variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
-                                               <a href={`tel:${v.phone}`}><Phone className="mr-2 h-3 w-3" /> Call</a>
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-muted-foreground">All volunteers have been assigned to a team.</p>
-                        )}
-                    </CardContent>
-                </Card>
+                {renderVolunteerTable("Unassigned Volunteers", `${unassignedVolunteers.length} member(s) not in any team`, unassignedVolunteers, null)}
             </div>
-            {selectedVolunteer && user && (
+            {selectedVolunteer && (
                 <VolunteerDetailsDialog
                     isOpen={isDetailsOpen}
                     onOpenChange={setIsDetailsOpen}
                     volunteer={selectedVolunteer}
                     teams={teams}
-                    isAdmin={isAdmin}
-                    token={user ? user.getIdToken() : undefined}
-                    onFormSubmit={handleFormSubmit}
                 />
             )}
              <Dialog open={isTeamFormOpen} onOpenChange={setIsTeamFormOpen}>
