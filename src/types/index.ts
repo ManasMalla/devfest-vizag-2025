@@ -37,3 +37,18 @@ export interface AdminUser {
 }
 
 export type UserRole = 'Admin' | 'Team Lead' | 'Volunteer' | 'Speaker' | 'Attendee';
+
+export interface Volunteer {
+  id: string; // This will be the user's UID
+  fullName: string;
+  email: string;
+  phone: string;
+  jobTitle: string;
+  teamId?: string | null;
+  isLead?: boolean;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+}

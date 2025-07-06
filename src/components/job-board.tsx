@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
-import type { Job, ClientJobApplication } from '@/types';
-import { getUserApplications } from '@/app/volunteer/actions';
+import type { Job, ClientJobApplication, UserRole } from '@/types';
+import { getUserApplications, getUserRole } from '@/app/volunteer/actions';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +13,9 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from './ui/skeleton';
 import { ApplicationDialog } from './application-dialog';
 import { Badge } from './ui/badge';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 interface JobBoardProps {
   jobs: Job[];
@@ -21,6 +23,7 @@ interface JobBoardProps {
 
 export default function JobBoard({ jobs }: JobBoardProps) {
   const [user, loading] = useAuthState(auth);
+  const [role, setRole] = useState<UserRole>('Attendee');
   const [activeTab, setActiveTab] = useState('Leads');
   const [userApplications, setUserApplications] = useState<ClientJobApplication[]>([]);
   const [isLoadingApps, setIsLoadingApps] = useState(true);
@@ -28,36 +31,39 @@ export default function JobBoard({ jobs }: JobBoardProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchUserApps = async () => {
+    const fetchUserData = async () => {
       if (user) {
         setIsLoadingApps(true);
         try {
           const token = await user.getIdToken();
-          const apps = await getUserApplications(token);
+          const [apps, userRole] = await Promise.all([
+            getUserApplications(token),
+            getUserRole(token),
+          ]);
           setUserApplications(apps);
+          setRole(userRole);
         } catch (error: any) {
           toast({
             variant: 'destructive',
-            title: 'Could not fetch applications',
+            title: 'Could not fetch data',
             description: error.message || 'An unknown error occurred. Please try again later.',
           });
-          // Ensure we clear any stale data
           setUserApplications([]);
+          setRole('Attendee');
         } finally {
           setIsLoadingApps(false);
         }
       } else {
-        // If user logs out, clear their applications and loading state
         setUserApplications([]);
         setIsLoadingApps(false);
+        setRole('Attendee');
       }
     };
     if (!loading) {
-      fetchUserApps();
+      fetchUserData();
     }
   }, [user, loading, refreshKey, toast]);
 
-  // Filter for open jobs only - old jobs without the field are treated as 'open'.
   const openJobs = jobs.filter(job => (job.status ?? 'open') === 'open');
 
   const leads = openJobs.filter((job) => job.category === 'Lead');
@@ -115,9 +121,27 @@ export default function JobBoard({ jobs }: JobBoardProps) {
     );
   };
   
+  const isTeamMember = role === 'Admin' || role === 'Team Lead' || role === 'Volunteer';
+
   return (
     <>
-      {user && (
+      {isTeamMember && (
+        <Alert className="mb-8 max-w-4xl mx-auto">
+          <AlertTitle className="font-bold">Welcome to the Team!</AlertTitle>
+          <AlertDescription>
+            You have access to the volunteer dashboard. Use it to coordinate with other team members.
+          </AlertDescription>
+          <div className="mt-4">
+              <Button asChild>
+                  <Link href="/volunteer/dashboard">
+                      Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+              </Button>
+          </div>
+        </Alert>
+      )}
+
+      {user && !isTeamMember && (
         <div className="mb-12">
           <h2 className="text-2xl font-bold tracking-tight text-center mb-6">Your Applications</h2>
           {isLoadingApps ? (

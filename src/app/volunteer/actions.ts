@@ -1,7 +1,7 @@
 'use server';
 
 import admin, { adminDb, adminAuth } from '@/lib/firebase-admin';
-import type { Job, JobApplication, ApplicationStatus, ClientJobApplication, UserRole } from '@/types';
+import type { Job, JobApplication, ApplicationStatus, ClientJobApplication, UserRole, Volunteer } from '@/types';
 import { FieldValue, type Query } from 'firebase-admin/firestore';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -382,6 +382,25 @@ export async function updateApplicationStatus(applicationId: string, status: App
 
     const appRef = adminDb.collection('applications').doc(applicationId);
     await appRef.update({ status: status });
+
+    // If accepted, add to volunteers collection
+    if (status === 'Accepted') {
+      const appDoc = await appRef.get();
+      const appData = appDoc.data();
+      if (appData) {
+        const volunteerData: Omit<Volunteer, 'id'> = {
+          fullName: appData.fullName,
+          email: appData.userEmail,
+          phone: appData.phone,
+          jobTitle: appData.jobTitle,
+          isLead: appData.jobTitle.toLowerCase().includes('lead'),
+          teamId: null,
+        };
+        // Use userId as the document ID to prevent duplicate volunteer entries for a user
+        await adminDb.collection('volunteers').doc(appData.userId).set(volunteerData, { merge: true });
+        revalidatePath('/volunteer/dashboard');
+      }
+    }
     
     revalidatePath('/admin');
     
@@ -489,27 +508,11 @@ export async function getUserRole(token: string): Promise<UserRole> {
       return 'Admin';
     }
 
-    // 2. Check for accepted applications to determine Lead/Volunteer roles
-    const acceptedAppsSnapshot = await adminDb
-      .collection('applications')
-      .where('userId', '==', uid)
-      .where('status', '==', 'Accepted')
-      .get();
-
-    if (!acceptedAppsSnapshot.empty) {
-      const jobIds = acceptedAppsSnapshot.docs.map(doc => doc.data().jobId);
-      
-      // Fetch the corresponding jobs. Use a batched 'in' query for efficiency.
-      const jobsSnapshot = await adminDb.collection('jobs').where(admin.firestore.FieldPath.documentId(), 'in', jobIds).get();
-      const jobCategories = jobsSnapshot.docs.map(doc => doc.data().category as Job['category']);
-
-      // Prioritize 'Lead' role over 'Volunteer'
-      if (jobCategories.includes('Lead')) {
-        return 'Team Lead';
-      }
-      if (jobCategories.includes('Volunteer')) {
-        return 'Volunteer';
-      }
+    // 2. Check for Volunteer/Lead role from the 'volunteers' collection
+    const volunteerDoc = await adminDb.collection('volunteers').doc(uid).get();
+    if (volunteerDoc.exists) {
+        const volunteerData = volunteerDoc.data() as Partial<Volunteer>;
+        return volunteerData.isLead ? 'Team Lead' : 'Volunteer';
     }
 
     // 3. Placeholder for Speaker role check (to be implemented later)
