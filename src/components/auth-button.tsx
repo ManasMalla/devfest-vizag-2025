@@ -107,7 +107,12 @@ export function AuthButton() {
   }
 
   if (loading) {
-    return <Skeleton className="h-10 w-10 rounded-full" />;
+    return (
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-6 w-20 rounded-md" />
+        <Skeleton className="h-10 w-10 rounded-full" />
+      </div>
+    );
   }
 
   if (error) {
@@ -117,36 +122,36 @@ export function AuthButton() {
 
   if (user) {
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={user.photoURL || ''} alt={user.displayName || ''} />
-              <AvatarFallback>{user.displayName?.charAt(0)}</AvatarFallback>
-            </Avatar>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" forceMount>
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-2">
-              <div>
+      <div className="flex items-center gap-2">
+        {role ? (
+            <Badge variant="secondary">{role}</Badge>
+        ) : (
+            <Skeleton className="h-6 w-20 rounded-md" />
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={user.photoURL || ''} alt={user.displayName || ''} />
+                <AvatarFallback>{user.displayName?.charAt(0)}</AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">{user.displayName}</p>
                 <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
               </div>
-              {role ? (
-                  <Badge variant="secondary" className="w-fit">{role}</Badge>
-              ) : (
-                  <Skeleton className="h-5 w-20 rounded-md" />
-              )}
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut}>
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     );
   }
 
