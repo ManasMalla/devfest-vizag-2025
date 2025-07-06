@@ -49,6 +49,22 @@ export interface Volunteer {
 }
 
 export interface Team {
-  id: string;
+  id:string;
   name: string;
+}
+
+export type TaskStatus = 'To Do' | 'In Progress' | 'Done';
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  status: TaskStatus;
+  assigneeId: string; // UID of the volunteer
+  assigneeName: string; 
+  teamId: string | null;
+  dueDate?: string | null; // ISO string
+  createdAt: string; // ISO string
+  createdBy: string; // UID of creator
+  creatorName: string;
 }
