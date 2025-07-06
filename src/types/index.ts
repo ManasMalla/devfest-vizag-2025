@@ -30,3 +30,8 @@ export interface JobApplication {
 export type ClientJobApplication = Omit<JobApplication, 'submittedAt'> & {
   submittedAt: string; // Serialized from Timestamp
 };
+
+export interface AdminUser {
+  uid: string;
+  email: string;
+}

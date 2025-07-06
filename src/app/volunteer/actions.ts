@@ -392,3 +392,86 @@ export async function updateApplicationStatus(applicationId: string, status: App
     return { error: `Failed to update status: ${errorMessage}` };
   }
 }
+
+// Admin Management Actions
+export async function getAdmins(token: string): Promise<{admins?: {uid: string, email: string}[], error?: string}> {
+  const adminCheck = await isAdmin(token);
+  if (!adminCheck.isAdmin) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const adminSnapshot = await adminDb.collection('admins').get();
+    const adminUids = adminSnapshot.docs.map(doc => doc.id);
+
+    if (adminUids.length === 0) {
+      return { admins: [] };
+    }
+    
+    // Firestore's `getUsers` can only take up to 100 UIDs at a time.
+    // For this app, that's a safe assumption, but for a larger app, batching would be needed.
+    const adminUsers = await adminAuth.getUsers(adminUids.map(uid => ({ uid })));
+
+    const admins = adminUsers.users.map(user => ({
+      uid: user.uid,
+      email: user.email || 'No email found',
+    }));
+
+    return { admins: admins.sort((a,b) => a.email.localeCompare(b.email)) };
+  } catch (error) {
+    console.error("Error fetching admins:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return { error: `Failed to fetch admins: ${errorMessage}` };
+  }
+}
+
+export async function addAdmin(email: string, token: string): Promise<{admin?: {uid: string, email: string}, error?: string}> {
+  const adminCheck = await isAdmin(token);
+  if (!adminCheck.isAdmin) {
+    return { error: "Unauthorized" };
+  }
+
+  if (!email) {
+    return { error: "Email cannot be empty." };
+  }
+
+  try {
+    const userRecord = await adminAuth.getUserByEmail(email);
+    const uid = userRecord.uid;
+
+    await adminDb.collection('admins').doc(uid).set({});
+    
+    revalidatePath('/admin');
+
+    return { admin: { uid, email: userRecord.email! } };
+  } catch (error: any) {
+    console.error("Error adding admin:", error);
+    if (error.code === 'auth/user-not-found') {
+      return { error: `User with email ${email} not found.` };
+    }
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return { error: `Failed to add admin: ${errorMessage}` };
+  }
+}
+
+export async function removeAdmin(uidToRemove: string, token: string): Promise<{success?: boolean, error?: string}> {
+  const adminCheck = await isAdmin(token);
+  if (!adminCheck.isAdmin) {
+    return { error: "Unauthorized" };
+  }
+  
+  const currentUid = await getVerifiedUid(token);
+  if (currentUid === uidToRemove) {
+      return { error: "You cannot remove yourself as an admin." };
+  }
+  
+  try {
+    await adminDb.collection('admins').doc(uidToRemove).delete();
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error) {
+    console.error("Error removing admin:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return { error: `Failed to remove admin: ${errorMessage}` };
+  }
+}

@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
-import { getJobs, isAdmin, getApplications } from "@/app/volunteer/actions";
+import { getJobs, isAdmin, getApplications, getAdmins } from "@/app/volunteer/actions";
 import AdminDashboard from "@/components/admin-dashboard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Terminal } from "lucide-react";
-import type { Job, ClientJobApplication } from '@/types';
+import type { Job, ClientJobApplication, AdminUser } from '@/types';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -16,11 +16,13 @@ export default function AdminPage() {
   const [status, setStatus] = useState({
     isLoading: true,
     isAuthorized: false,
-    token: ''
+    token: '',
+    uid: ''
   });
   const [jobs, setJobs] = useState<Job[]>([]);
   const [applications, setApplications] = useState<ClientJobApplication[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [admins, setAdmins] = useState<AdminUser[]>([]);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -29,23 +31,29 @@ export default function AdminPage() {
           const idToken = await user.getIdToken();
           const adminCheck = await isAdmin(idToken);
           if (adminCheck.isAdmin) {
-            const [initialJobs, initialApplicationsData] = await Promise.all([
+            const [initialJobs, initialApplicationsData, initialAdminsData] = await Promise.all([
               getJobs(),
-              getApplications(idToken, { status: 'All', jobTitle: 'All' }, { limit: ITEMS_PER_PAGE })
+              getApplications(idToken, { status: 'All', jobTitle: 'All' }, { limit: ITEMS_PER_PAGE }),
+              getAdmins(idToken)
             ]);
             setJobs(initialJobs);
             setApplications(initialApplicationsData.applications);
             setNextCursor(initialApplicationsData.nextCursor);
-            setStatus({ isLoading: false, isAuthorized: true, token: idToken });
+            if (initialAdminsData.admins) {
+              setAdmins(initialAdminsData.admins);
+            } else if (initialAdminsData.error) {
+              console.error("Error fetching admins:", initialAdminsData.error);
+            }
+            setStatus({ isLoading: false, isAuthorized: true, token: idToken, uid: user.uid });
           } else {
-            setStatus({ isLoading: false, isAuthorized: false, token: '' });
+            setStatus({ isLoading: false, isAuthorized: false, token: '', uid: '' });
           }
         } catch (error) {
            console.error("Error during admin check:", error);
-           setStatus({ isLoading: false, isAuthorized: false, token: '' });
+           setStatus({ isLoading: false, isAuthorized: false, token: '', uid: '' });
         }
       } else {
-        setStatus({ isLoading: false, isAuthorized: false, token: '' });
+        setStatus({ isLoading: false, isAuthorized: false, token: '', uid: '' });
       }
     };
     if (!loading) {
@@ -82,13 +90,15 @@ export default function AdminPage() {
           Admin Dashboard
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Manage job postings and view applications.
+          Manage job postings, applications, and administrators.
         </p>
       </div>
       <AdminDashboard 
         initialJobs={jobs}
         initialApplications={applications}
         initialNextCursor={nextCursor}
+        initialAdmins={admins}
+        currentUserUid={status.uid}
         token={status.token}
       />
     </div>
