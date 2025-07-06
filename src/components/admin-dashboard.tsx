@@ -13,11 +13,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { JobFormDialog } from './job-form-dialog';
-import { deleteJob } from '@/app/volunteer/actions';
+import { deleteJob, updateJobStatus } from '@/app/volunteer/actions';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ApplicationsList } from './applications-list';
+import { Switch } from '@/components/ui/switch';
 
 
 interface AdminDashboardProps {
@@ -47,6 +48,20 @@ export default function AdminDashboard({ initialJobs, initialApplications, initi
     const result = await deleteJob(jobId, token);
     if (result.success) {
       setJobs(jobs.filter((job) => job.id !== jobId));
+      toast({ title: "Success", description: result.success });
+    } else {
+      toast({ variant: 'destructive', title: "Error", description: result.error });
+    }
+  };
+
+  const handleStatusToggle = async (job: Job) => {
+    const newStatus = (job.status ?? 'open') === 'open' ? 'closed' : 'open';
+    const result = await updateJobStatus(job.id, newStatus, token);
+
+    if (result.success) {
+      setJobs(currentJobs => currentJobs.map(j => 
+        j.id === job.id ? { ...j, status: newStatus } : j
+      ));
       toast({ title: "Success", description: result.success });
     } else {
       toast({ variant: 'destructive', title: "Error", description: result.error });
@@ -96,7 +111,7 @@ export default function AdminDashboard({ initialJobs, initialApplications, initi
               <TableRow>
                 <TableHead>Title</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead>Description</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -109,7 +124,19 @@ export default function AdminDashboard({ initialJobs, initialApplications, initi
                       {job.category}
                     </Badge>
                   </TableCell>
-                  <TableCell className="max-w-sm truncate">{job.description}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                       <Switch
+                        id={`status-switch-${job.id}`}
+                        checked={(job.status ?? 'open') === 'open'}
+                        onCheckedChange={() => handleStatusToggle(job)}
+                        aria-label={`Toggle status for ${job.title}`}
+                       />
+                       <Badge variant={(job.status ?? 'open') === 'open' ? 'secondary' : 'destructive'}>
+                          {(job.status ?? 'open') === 'open' ? 'Open' : 'Closed'}
+                       </Badge>
+                    </div>
+                  </TableCell>
                   <TableCell className="text-right">
                     <AlertDialog>
                       <DropdownMenu>

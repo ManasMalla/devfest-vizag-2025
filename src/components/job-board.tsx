@@ -19,8 +19,11 @@ export default function JobBoard({ jobs }: JobBoardProps) {
   const [user, loading] = useAuthState(auth);
   const [activeTab, setActiveTab] = useState('Leads');
 
-  const leads = jobs.filter((job) => job.category === 'Lead');
-  const volunteers = jobs.filter((job) => job.category === 'Volunteer');
+  // Filter for open jobs only - old jobs without the field are treated as 'open'.
+  const openJobs = jobs.filter(job => (job.status ?? 'open') === 'open');
+
+  const leads = openJobs.filter((job) => job.category === 'Lead');
+  const volunteers = openJobs.filter((job) => job.category === 'Volunteer');
 
   const renderJobList = (jobList: Job[]) => {
     if (jobList.length === 0) {

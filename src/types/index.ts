@@ -6,6 +6,7 @@ export interface Job {
   description: string;
   category: 'Lead' | 'Volunteer';
   additionalQuestions?: string[];
+  status?: 'open' | 'closed';
 }
 
 export type ApplicationStatus = 'Applied' | 'Shortlisted' | 'Accepted' | 'Rejected';

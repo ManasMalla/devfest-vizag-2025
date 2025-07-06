@@ -84,6 +84,7 @@ export async function addJob(formData: FormData, token?: string) {
       description,
       category,
       additionalQuestions: additionalQuestions?.split('\n').map(q => q.trim()).filter(Boolean) || [],
+      status: 'open' as const,
     };
     const newDocRef = await adminDb.collection('jobs').add(jobData);
     
@@ -127,7 +128,11 @@ export async function updateJob(jobId: string, formData: FormData, token?: strin
     revalidatePath('/volunteer');
     revalidatePath('/admin');
     
-    const updatedJob: Job = { id: jobId, ...updatedData };
+    // We need to fetch the existing status to return the full job object
+    const updatedDoc = await jobRef.get();
+    const existingData = updatedDoc.data() as Job;
+
+    const updatedJob: Job = { id: jobId, ...updatedData, status: existingData.status ?? 'open' };
     return { success: "Job updated successfully.", job: updatedJob };
   } catch (error) {
      if (error instanceof z.ZodError) {
@@ -154,6 +159,27 @@ export async function deleteJob(jobId: string, token?: string) {
     console.error("Error deleting job: ", error);
     const errorMessage = error instanceof Error ? error.message : String(error);
     return { error: `Failed to delete job: ${errorMessage}` };
+  }
+}
+
+export async function updateJobStatus(jobId: string, status: 'open' | 'closed', token?: string) {
+  try {
+    const adminCheck = await isAdmin(token);
+    if (!adminCheck.isAdmin) {
+      return { error: "Unauthorized" };
+    }
+
+    const jobRef = adminDb.collection('jobs').doc(jobId);
+    await jobRef.update({ status });
+    
+    revalidatePath('/volunteer');
+    revalidatePath('/admin');
+    
+    return { success: `Job status updated to ${status}.` };
+  } catch (error) {
+    console.error("Error updating job status: ", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return { error: `Failed to update job status: ${errorMessage}` };
   }
 }
 
@@ -221,7 +247,7 @@ export async function getApplications(
     //
     // 1. To filter by status AND job title (and to filter by status only):
     //    - Collection: applications
-    //    - Fields: status (Ascending), submittedAt (Descending)
+    //    - Fields: status (Ascending), jobTitle (Ascending), submittedAt (Descending)
     //
     // 2. To filter by job title ONLY:
     //    - Collection: applications
