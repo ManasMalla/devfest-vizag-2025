@@ -13,6 +13,7 @@ import { Skeleton } from './ui/skeleton';
 import { ApplicationDialog } from './application-dialog';
 import { Badge } from './ui/badge';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface JobBoardProps {
   jobs: Job[];
@@ -24,17 +25,29 @@ export default function JobBoard({ jobs }: JobBoardProps) {
   const [userApplications, setUserApplications] = useState<ClientJobApplication[]>([]);
   const [isLoadingApps, setIsLoadingApps] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchUserApps = async () => {
       if (user) {
         setIsLoadingApps(true);
-        const token = await user.getIdToken();
-        const apps = await getUserApplications(token);
-        setUserApplications(apps);
-        setIsLoadingApps(false);
+        try {
+          const token = await user.getIdToken();
+          const apps = await getUserApplications(token);
+          setUserApplications(apps);
+        } catch (error: any) {
+          toast({
+            variant: 'destructive',
+            title: 'Could not fetch applications',
+            description: error.message || 'An unknown error occurred. Please try again later.',
+          });
+          // Ensure we clear any stale data
+          setUserApplications([]);
+        } finally {
+          setIsLoadingApps(false);
+        }
       } else {
-        // If user logs out, clear their applications
+        // If user logs out, clear their applications and loading state
         setUserApplications([]);
         setIsLoadingApps(false);
       }
@@ -42,7 +55,7 @@ export default function JobBoard({ jobs }: JobBoardProps) {
     if (!loading) {
       fetchUserApps();
     }
-  }, [user, loading, refreshKey]);
+  }, [user, loading, refreshKey, toast]);
 
   // Filter for open jobs only - old jobs without the field are treated as 'open'.
   const openJobs = jobs.filter(job => (job.status ?? 'open') === 'open');

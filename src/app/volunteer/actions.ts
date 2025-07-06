@@ -248,11 +248,17 @@ export async function submitApplication(formData: FormData, token?: string) {
 export async function getUserApplications(token: string | undefined): Promise<ClientJobApplication[]> {
   const uid = await getVerifiedUid(token);
   if (!uid) {
+    // Return empty array if user is not logged in, this is not an error condition.
     return [];
   }
 
   try {
+    // NOTE ON FIRESTORE INDEXES:
+    // This query requires a composite index to function correctly. If you are seeing
+    // errors or empty results, please create the following index in your Firestore console:
+    // Collection: applications, Fields: userId (Ascending), submittedAt (Descending)
     const appSnapshot = await adminDb.collection('applications').where('userId', '==', uid).orderBy('submittedAt', 'desc').get();
+    
     const applications = appSnapshot.docs.map(doc => {
       const data = doc.data();
       const clientApp: ClientJobApplication = {
@@ -265,15 +271,21 @@ export async function getUserApplications(token: string | undefined): Promise<Cl
         phone: data.phone,
         whatsapp: data.whatsapp,
         answers: data.answers,
+        // The submittedAt field is a Firestore Timestamp, so we convert it to a string
         submittedAt: data.submittedAt.toDate().toISOString(),
         status: data.status,
       };
       return clientApp;
     });
     return applications;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching user applications:", error);
-    return [];
+    // Re-throwing the error so it can be caught by the client component and displayed in a toast.
+    // We add a more user-friendly message to the error.
+    if (error.code === 'failed-precondition') {
+      throw new Error('A database index is required for this query. Please check server logs for a link to create it.');
+    }
+    throw new Error('An error occurred while fetching your applications.');
   }
 }
 
