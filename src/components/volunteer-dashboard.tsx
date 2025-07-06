@@ -133,8 +133,8 @@ export default function VolunteerDashboard() {
     const isAdmin = role === 'Admin';
     const unassignedVolunteers = volunteers.filter(v => !v.teamId);
 
-    const renderVolunteerTable = (title: string, description: string, volunteerList: Volunteer[], teamId: string | null = null) => (
-        <Card>
+    const renderVolunteerTable = (key: string, title: string, description: string, volunteerList: Volunteer[]) => (
+        <Card key={key}>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Users /> {title}</CardTitle>
                 <CardDescription>{description}</CardDescription>
@@ -230,10 +230,10 @@ export default function VolunteerDashboard() {
                     const members = volunteers
                         .filter(v => v.teamId === team.id)
                         .sort((a, b) => (b.isLead ? 1 : 0) - (a.isLead ? 1 : 0));
-                    return renderVolunteerTable(team.name, `${members.length} member(s)`, members, team.id);
+                    return renderVolunteerTable(team.id, team.name, `${members.length} member(s)`, members);
                 })}
 
-                {renderVolunteerTable("Unassigned Volunteers", `${unassignedVolunteers.length} member(s) not in any team`, unassignedVolunteers, null)}
+                {renderVolunteerTable("unassigned", "Unassigned Volunteers", `${unassignedVolunteers.length} member(s) not in any team`, unassignedVolunteers)}
             </div>
             {selectedVolunteer && (
                 <VolunteerDetailsDialog
