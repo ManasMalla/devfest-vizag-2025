@@ -144,15 +144,19 @@ export async function updateVolunteerLeadStatus(volunteerId: string, isLead: boo
 
 // Task Actions
 
-const TaskSchema = z.object({
+const ManageTaskFormSchema = z.object({
     id: z.string().optional(),
     title: z.string().min(3, "Title must be at least 3 characters long"),
     description: z.string().optional(),
-    assigneeId: z.string({ required_error: "An assignee is required." }),
     dueDate: z.date().optional().nullable(),
+    // For non-admins
+    assigneeId: z.string().optional(),
+    // For admins
+    teamId: z.string().optional(),
 });
 
-export async function manageTask(formData: z.infer<typeof TaskSchema>, token: string): Promise<{ success?: boolean, error?: string }> {
+
+export async function manageTask(formData: z.infer<typeof ManageTaskFormSchema>, token: string): Promise<{ success?: boolean, error?: string }> {
     const authCheck = await verifyAuthorized(token);
     if (authCheck.error) return { error: authCheck.error };
     
@@ -165,38 +169,66 @@ export async function manageTask(formData: z.infer<typeof TaskSchema>, token: st
         }
         const creatorName = creatorDoc.data()?.fullName || 'Unknown';
 
-        const assigneeDoc = await adminDb.collection('volunteers').doc(formData.assigneeId).get();
-        if (!assigneeDoc.exists) {
-            return { error: "Assignee not found." };
-        }
-        const assigneeData = assigneeDoc.data() as Volunteer;
+        let finalAssigneeId: string;
+        let finalAssigneeName: string;
+        let finalTeamId: string | null;
 
-        // Authorization checks
-        if (role === 'Volunteer' && formData.assigneeId !== uid) {
-            return { error: "Volunteers can only assign tasks to themselves." };
-        }
-        if (role === 'Team Lead') {
-            const leadData = creatorDoc.data();
-            if (leadData?.teamId !== assigneeData.teamId) {
-                return { error: "Team Leads can only assign tasks to members of their own team." };
+        if (role === 'Admin') {
+            if (!formData.teamId) {
+                return { error: "A team must be selected." };
+            }
+            finalTeamId = formData.teamId;
+
+            const teamLeadsSnapshot = await adminDb.collection('volunteers')
+                .where('teamId', '==', formData.teamId)
+                .where('isLead', '==', true)
+                .limit(1)
+                .get();
+            
+            if (teamLeadsSnapshot.empty) {
+                return { error: "The selected team does not have a designated Team Lead. Please assign one." };
+            }
+            const leadDoc = teamLeadsSnapshot.docs[0];
+            finalAssigneeId = leadDoc.id;
+            finalAssigneeName = leadDoc.data().fullName;
+        } else {
+            if (!formData.assigneeId) {
+                return { error: "An assignee is required." };
+            }
+            finalAssigneeId = formData.assigneeId;
+
+            const assigneeDoc = await adminDb.collection('volunteers').doc(finalAssigneeId).get();
+            if (!assigneeDoc.exists) {
+                return { error: "Assignee not found." };
+            }
+            const assigneeData = assigneeDoc.data() as Volunteer;
+            finalAssigneeName = assigneeData.fullName;
+            finalTeamId = assigneeData.teamId || null;
+
+            // Authorization checks
+            if (role === 'Volunteer' && finalAssigneeId !== uid) {
+                return { error: "Volunteers can only assign tasks to themselves." };
+            }
+            if (role === 'Team Lead') {
+                const leadData = creatorDoc.data();
+                if (leadData?.teamId !== assigneeData.teamId) {
+                    return { error: "Team Leads can only assign tasks to members of their own team." };
+                }
             }
         }
         
         const taskData = {
             title: formData.title,
             description: formData.description || '',
-            assigneeId: formData.assigneeId,
-            assigneeName: assigneeData.fullName,
-            teamId: assigneeData.teamId || null,
+            assigneeId: finalAssigneeId,
+            assigneeName: finalAssigneeName,
+            teamId: finalTeamId,
             dueDate: formData.dueDate ? FieldValue.serverTimestamp.fromDate(formData.dueDate) : null,
         };
         
         if (formData.id) {
-            // Update existing task
-            const taskRef = adminDb.collection('tasks').doc(formData.id);
-            await taskRef.update(taskData);
+            await adminDb.collection('tasks').doc(formData.id).update(taskData);
         } else {
-            // Create new task
             await adminDb.collection('tasks').add({
                 ...taskData,
                 status: 'To Do' as TaskStatus,
@@ -214,6 +246,7 @@ export async function manageTask(formData: z.infer<typeof TaskSchema>, token: st
         return { error: `Failed to save task: ${errorMessage}` };
     }
 }
+
 
 export async function updateTaskStatus(taskId: string, status: TaskStatus, token: string): Promise<{ success?: boolean, error?: string }> {
     const authCheck = await verifyAuthorized(token);

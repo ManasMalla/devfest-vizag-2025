@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -41,7 +41,8 @@ interface TaskFormDialogProps {
 const TaskFormSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters long"),
   description: z.string().optional(),
-  assigneeId: z.string({ required_error: "An assignee is required." }),
+  assigneeId: z.string().optional(),
+  teamId: z.string().optional(),
   dueDate: z.date().optional().nullable(),
 });
 
@@ -60,6 +61,7 @@ export function TaskFormDialog({ isOpen, setIsOpen, task, volunteers, teams, cur
           title: task.title,
           description: task.description,
           assigneeId: task.assigneeId,
+          teamId: task.teamId || undefined,
           dueDate: task.dueDate ? new Date(task.dueDate) : null,
         });
       } else {
@@ -67,6 +69,7 @@ export function TaskFormDialog({ isOpen, setIsOpen, task, volunteers, teams, cur
           title: '',
           description: '',
           assigneeId: currentUser.role === 'Volunteer' ? currentUser.uid : undefined,
+          teamId: undefined,
           dueDate: null,
         });
       }
@@ -87,7 +90,9 @@ export function TaskFormDialog({ isOpen, setIsOpen, task, volunteers, teams, cur
   }, [volunteers, currentUser]);
 
   const assigneeOptionsByTeam = useMemo(() => {
-      if (currentUser.role !== 'Admin') return [];
+      // This is only for the non-admin view now
+      if (currentUser.role === 'Admin') return [];
+
       const grouped: { [key: string]: Volunteer[] } = {};
       assignableVolunteers.forEach(v => {
           const teamId = v.teamId || 'unassigned';
@@ -107,11 +112,9 @@ export function TaskFormDialog({ isOpen, setIsOpen, task, volunteers, teams, cur
 
   async function onSubmit(values: z.infer<typeof TaskFormSchema>) {
     setIsSubmitting(true);
-    const assignee = volunteers.find(v => v.id === values.assigneeId);
     const result = await manageTask({ 
-        ...values,
         id: task?.id,
-        teamId: assignee?.teamId || null,
+        ...values,
     }, token);
 
     if (result.success) {
@@ -161,35 +164,52 @@ export function TaskFormDialog({ isOpen, setIsOpen, task, volunteers, teams, cur
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="assigneeId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Assign To</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={currentUser.role === 'Volunteer'}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a volunteer" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {currentUser.role === 'Admin' ? (
-                        assigneeOptionsByTeam.map(group => (
-                          <SelectGroup key={group.id}>
-                            <Label className="px-2 py-1.5 text-xs font-semibold">{group.name}</Label>
-                            {group.members.map(v => <SelectItem key={v.id} value={v.id}>{v.fullName}</SelectItem>)}
-                          </SelectGroup>
-                        ))
-                      ) : (
-                        assignableVolunteers.map(v => <SelectItem key={v.id} value={v.id}>{v.fullName}</SelectItem>)
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
+            {currentUser.role === 'Admin' ? (
+                <FormField
+                  control={form.control}
+                  name="teamId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Assign to Team</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a team to assign the task" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {teams.map(team => <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>The task will be automatically assigned to the team's lead.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            ) : (
+                <FormField
+                  control={form.control}
+                  name="assigneeId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Assign To</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={currentUser.role === 'Volunteer'}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a volunteer" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {assignableVolunteers.map(v => <SelectItem key={v.id} value={v.id}>{v.fullName}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            )}
+            
             <FormField
               control={form.control}
               name="dueDate"
