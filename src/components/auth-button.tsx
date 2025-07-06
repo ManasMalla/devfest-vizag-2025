@@ -15,6 +15,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
+import { useEffect, useState } from 'react';
+import type { UserRole } from '@/types';
+import { getUserRole } from '@/app/volunteer/actions';
+import { Badge } from '@/components/ui/badge';
 
 function GoogleIcon() {
   return (
@@ -48,6 +52,32 @@ export function AuthButton() {
   // If Firebase isn't configured, auth will be null.
   // We can use this to fall back to a safe state.
   const [user, loading, error] = auth ? useAuthState(auth) : [null, true, undefined];
+  const [role, setRole] = useState<UserRole | null>(null);
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      if (user) {
+        // Reset role state while fetching
+        setRole(null);
+        try {
+          const token = await user.getIdToken();
+          const userRole = await getUserRole(token);
+          setRole(userRole);
+        } catch (err) {
+          console.error("Failed to fetch user role:", err);
+          setRole('Attendee'); // Default to attendee on error
+        }
+      } else {
+        // Clear role on logout
+        setRole(null);
+      }
+    };
+
+    if (!loading) {
+      fetchRole();
+    }
+  }, [user, loading]);
+
 
   const handleSignIn = async () => {
     if (!auth) return;
@@ -98,9 +128,16 @@ export function AuthButton() {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{user.displayName}</p>
-              <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+            <div className="flex flex-col space-y-2">
+              <div>
+                <p className="text-sm font-medium leading-none">{user.displayName}</p>
+                <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+              </div>
+              {role ? (
+                  <Badge variant="secondary" className="w-fit">{role}</Badge>
+              ) : (
+                  <Skeleton className="h-5 w-20 rounded-md" />
+              )}
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />

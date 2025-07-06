@@ -35,3 +35,5 @@ export interface AdminUser {
   uid: string;
   email: string;
 }
+
+export type UserRole = 'Admin' | 'Team Lead' | 'Volunteer' | 'Speaker' | 'Attendee';

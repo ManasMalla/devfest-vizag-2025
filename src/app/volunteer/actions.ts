@@ -1,7 +1,7 @@
 'use server';
 
-import { adminDb, adminAuth } from '@/lib/firebase-admin';
-import type { Job, JobApplication, ApplicationStatus, ClientJobApplication } from '@/types';
+import admin, { adminDb, adminAuth } from '@/lib/firebase-admin';
+import type { Job, JobApplication, ApplicationStatus, ClientJobApplication, UserRole } from '@/types';
 import { FieldValue, type Query } from 'firebase-admin/firestore';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -473,5 +473,54 @@ export async function removeAdmin(uidToRemove: string, token: string): Promise<{
     console.error("Error removing admin:", error);
     const errorMessage = error instanceof Error ? error.message : String(error);
     return { error: `Failed to remove admin: ${errorMessage}` };
+  }
+}
+
+export async function getUserRole(token: string): Promise<UserRole> {
+  const uid = await getVerifiedUid(token);
+  if (!uid) {
+    return 'Attendee';
+  }
+
+  try {
+    // 1. Check for Admin role (highest priority)
+    const adminDoc = await adminDb.collection('admins').doc(uid).get();
+    if (adminDoc.exists) {
+      return 'Admin';
+    }
+
+    // 2. Check for accepted applications to determine Lead/Volunteer roles
+    const acceptedAppsSnapshot = await adminDb
+      .collection('applications')
+      .where('userId', '==', uid)
+      .where('status', '==', 'Accepted')
+      .get();
+
+    if (!acceptedAppsSnapshot.empty) {
+      const jobIds = acceptedAppsSnapshot.docs.map(doc => doc.data().jobId);
+      
+      // Fetch the corresponding jobs. Use a batched 'in' query for efficiency.
+      const jobsSnapshot = await adminDb.collection('jobs').where(admin.firestore.FieldPath.documentId(), 'in', jobIds).get();
+      const jobCategories = jobsSnapshot.docs.map(doc => doc.data().category as Job['category']);
+
+      // Prioritize 'Lead' role over 'Volunteer'
+      if (jobCategories.includes('Lead')) {
+        return 'Team Lead';
+      }
+      if (jobCategories.includes('Volunteer')) {
+        return 'Volunteer';
+      }
+    }
+
+    // 3. Placeholder for Speaker role check (to be implemented later)
+    //    e.g., check a 'speakers' collection
+
+    // 4. Default to Attendee
+    return 'Attendee';
+
+  } catch (error) {
+    console.error("Error determining user role:", error);
+    // In case of error, default to the least privileged role for security.
+    return 'Attendee';
   }
 }
