@@ -98,7 +98,7 @@ export default function JobBoard({ jobs }: JobBoardProps) {
               <CardTitle>{job.title}</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow">
-              <CardDescription>{job.description}</CardDescription>
+              <CardDescription className="whitespace-pre-wrap">{job.description}</CardDescription>
             </CardContent>
             <CardFooter>
               {loading ? (
