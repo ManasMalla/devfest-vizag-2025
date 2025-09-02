@@ -86,8 +86,8 @@ export function ApplicationsList({ initialApplications, initialNextCursor, jobs,
       } else if (direction === 'reset') {
         setPrevCursors([]);
       }
-    } catch (e) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch applications. A composite index in Firestore may be required.' });
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Error', description: e.message || 'Failed to fetch applications. A composite index in Firestore may be required.' });
     } finally {
       setIsLoading(false);
     }
