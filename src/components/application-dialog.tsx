@@ -114,7 +114,7 @@ export function ApplicationDialog({ job, user, children, onApplicationSubmitted 
             Review the job details and fill out the form below to apply.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex-grow overflow-hidden">
+        <div className="flex-grow overflow-y-auto min-h-0">
             <ScrollArea className="h-full pr-6">
                 <div className="space-y-4">
                 <div>
@@ -180,13 +180,12 @@ export function ApplicationDialog({ job, user, children, onApplicationSubmitted 
                             ))}
                         </div>
                     )}
-                    {/* The footer is moved outside the scrollable area */}
                     </form>
                 </Form>
                 </div>
             </ScrollArea>
         </div>
-         <DialogFooter>
+         <DialogFooter className="flex-shrink-0">
             <DialogClose asChild>
                 <Button type="button" variant="secondary" disabled={isSubmitting}>
                 Cancel

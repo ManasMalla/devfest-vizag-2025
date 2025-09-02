@@ -106,7 +106,7 @@ export function JobFormDialog({ isOpen, setIsOpen, job, token, onFormSubmit }: J
             {job ? 'Update the details for this job posting.' : 'Create a new job posting for volunteers or leads.'}
           </DialogDescription>
         </DialogHeader>
-        <div className="flex-grow overflow-hidden">
+        <div className="flex-grow overflow-y-auto min-h-0">
           <ScrollArea className="h-full pr-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -177,7 +177,7 @@ export function JobFormDialog({ isOpen, setIsOpen, job, token, onFormSubmit }: J
             </Form>
           </ScrollArea>
         </div>
-        <DialogFooter>
+        <DialogFooter className="flex-shrink-0">
             <Button type="button" variant="secondary" onClick={() => setIsOpen(false)} disabled={isSubmitting}>
               Cancel
             </Button>

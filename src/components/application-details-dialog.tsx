@@ -56,7 +56,7 @@ export function ApplicationDetailsDialog({ application, isOpen, onOpenChange }: 
             Reviewing application from <span className="font-semibold">{application.fullName}</span>.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex-grow overflow-hidden">
+        <div className="flex-grow overflow-y-auto min-h-0">
             <ScrollArea className="h-full pr-6">
                 <div className="space-y-6 py-4">
                     <div className="space-y-4">
@@ -89,7 +89,7 @@ export function ApplicationDetailsDialog({ application, isOpen, onOpenChange }: 
                 </div>
             </ScrollArea>
         </div>
-        <DialogFooter>
+        <DialogFooter className="flex-shrink-0">
           <DialogClose asChild>
             <Button type="button" variant="secondary">Close</Button>
           </DialogClose>

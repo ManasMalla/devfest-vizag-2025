@@ -90,27 +90,6 @@ export function TaskFormDialog({ isOpen, setIsOpen, task, volunteers, teams, cur
     return [];
   }, [volunteers, currentUser]);
 
-  const assigneeOptionsByTeam = useMemo(() => {
-      // This is only for the non-admin view now
-      if (currentUser.role === 'Admin') return [];
-
-      const grouped: { [key: string]: Volunteer[] } = {};
-      assignableVolunteers.forEach(v => {
-          const teamId = v.teamId || 'unassigned';
-          if (!grouped[teamId]) {
-              grouped[teamId] = [];
-          }
-          grouped[teamId].push(v);
-      });
-      const teamIdToName = teams.reduce((acc, team) => ({...acc, [team.id]: team.name}), {} as Record<string, string>);
-      
-      return Object.entries(grouped).map(([teamId, members]) => ({
-          id: teamId,
-          name: teamIdToName[teamId] || 'Unassigned',
-          members
-      }));
-  }, [assignableVolunteers, teams, currentUser.role]);
-
   async function onSubmit(values: z.infer<typeof TaskFormSchema>) {
     setIsSubmitting(true);
     const result = await manageTask({ 
@@ -137,7 +116,7 @@ export function TaskFormDialog({ isOpen, setIsOpen, task, volunteers, teams, cur
             {task ? 'Update the details for this task.' : 'Fill out the form to create a new task.'}
           </DialogDescription>
         </DialogHeader>
-        <div className="flex-grow overflow-hidden">
+        <div className="flex-grow overflow-y-auto min-h-0">
           <ScrollArea className="h-full pr-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -256,7 +235,7 @@ export function TaskFormDialog({ isOpen, setIsOpen, task, volunteers, teams, cur
             </Form>
           </ScrollArea>
         </div>
-        <DialogFooter>
+        <DialogFooter className="flex-shrink-0">
             <Button type="button" variant="secondary" onClick={() => setIsOpen(false)} disabled={isSubmitting}>
               Cancel
             </Button>
