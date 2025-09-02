@@ -527,3 +527,5 @@ export async function getUserRole(token: string): Promise<UserRole> {
     return 'Attendee';
   }
 }
+
+    
