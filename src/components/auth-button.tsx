@@ -1,5 +1,7 @@
+
 'use client';
 
+import Link from 'next/link';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
@@ -13,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut } from 'lucide-react';
+import { LogOut, Shield } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import { useEffect, useState } from 'react';
 import type { UserRole } from '@/types';
@@ -145,6 +147,14 @@ export function AuthButton() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            {role === 'Admin' && (
+              <DropdownMenuItem asChild>
+                <Link href="/admin">
+                  <Shield className="mr-2 h-4 w-4" />
+                  <span>Admin Panel</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={handleSignOut}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
