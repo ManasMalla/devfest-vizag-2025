@@ -118,7 +118,7 @@ export function TaskFormDialog({ isOpen, setIsOpen, task, volunteers, teams, cur
         </DialogHeader>
         <div className="flex-grow overflow-y-auto min-h-0">
           <ScrollArea className="h-full">
-            <div className="pr-6 py-1">
+            <div className="px-2 pr-6 py-1">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField

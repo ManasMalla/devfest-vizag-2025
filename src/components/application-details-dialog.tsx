@@ -57,8 +57,8 @@ export function ApplicationDetailsDialog({ application, isOpen, onOpenChange }: 
           </DialogDescription>
         </DialogHeader>
         <div className="flex-grow overflow-y-auto min-h-0">
-            <ScrollArea className="h-full pr-6">
-                <div className="space-y-6 py-4">
+            <ScrollArea className="h-full">
+                <div className="space-y-6 py-4 pl-2 pr-6">
                     <div className="space-y-4">
                         <DetailItem icon={Briefcase} label="Applying For" value={application.jobTitle} />
                         <DetailItem icon={Mail} label="Email" value={application.userEmail} />
