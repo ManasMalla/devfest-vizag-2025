@@ -115,8 +115,8 @@ export function ApplicationDialog({ job, user, children, onApplicationSubmitted 
           </DialogDescription>
         </DialogHeader>
         <div className="flex-grow overflow-y-auto min-h-0">
-            <ScrollArea className="h-full pr-6">
-                <div className="space-y-4">
+            <ScrollArea className="h-full">
+                <div className="space-y-4 pr-6 py-1">
                 <div>
                     <h3 className="font-semibold mb-2">Job Description</h3>
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">{job.description}</p>

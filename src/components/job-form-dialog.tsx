@@ -107,74 +107,77 @@ export function JobFormDialog({ isOpen, setIsOpen, job, token, onFormSubmit }: J
           </DialogDescription>
         </DialogHeader>
         <div className="flex-grow overflow-y-auto min-h-0">
-          <ScrollArea className="h-full pr-6">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Job Title</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Social Media Lead" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value ?? 'Volunteer'}>
+          <ScrollArea className="h-full">
+            <div className="pr-6 py-1">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Job Title</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
+                          <Input placeholder="e.g., Social Media Lead" {...field} />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Lead">Lead</SelectItem>
-                          <SelectItem value="Volunteer">Volunteer</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Job Description</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Describe the responsibilities for this role..." className="min-h-[100px]" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="additionalQuestions"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Additional Questions</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="e.g., Why do you want to volunteer?&#10;What is your past experience?" className="min-h-[100px]" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Add any extra questions you want to ask applicants. Each question should be on a new line.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value ?? 'Volunteer'}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Lead">Lead</SelectItem>
+                            <SelectItem value="Volunteer">Volunteer</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Job Description</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Describe the responsibilities for this role..." className="min-h-[100px]" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="additionalQuestions"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Additional Questions</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="e.g., Why do you want to volunteer?
+What is your past experience?" className="min-h-[100px]" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Add any extra questions you want to ask applicants. Each question should be on a new line.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </form>
+              </Form>
+            </div>
           </ScrollArea>
         </div>
         <DialogFooter className="flex-shrink-0">

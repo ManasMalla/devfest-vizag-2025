@@ -117,122 +117,124 @@ export function TaskFormDialog({ isOpen, setIsOpen, task, volunteers, teams, cur
           </DialogDescription>
         </DialogHeader>
         <div className="flex-grow overflow-y-auto min-h-0">
-          <ScrollArea className="h-full pr-6">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Design social media posts" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Add more details about the task..." className="min-h-[100px]" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <ScrollArea className="h-full">
+            <div className="pr-6 py-1">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Title</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Design social media posts" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Add more details about the task..." className="min-h-[100px]" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {currentUser.role === 'Admin' ? (
-                    <FormField
-                      control={form.control}
-                      name="teamId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Assign to Team</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a team to assign the task" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {teams.map(team => <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>The task will be automatically assigned to the team's lead.</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                ) : (
-                    <FormField
-                      control={form.control}
-                      name="assigneeId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Assign To</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value} disabled={currentUser.role === 'Volunteer'}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a volunteer" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {assignableVolunteers.map(v => <SelectItem key={v.id} value={v.id}>{v.fullName}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                )}
-                
-                <FormField
-                  control={form.control}
-                  name="dueDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Due Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-[240px] pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value ?? undefined}
-                            onSelect={field.onChange}
-                            disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
+                  {currentUser.role === 'Admin' ? (
+                      <FormField
+                        control={form.control}
+                        name="teamId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Assign to Team</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a team to assign the task" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {teams.map(team => <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>The task will be automatically assigned to the team's lead.</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                  ) : (
+                      <FormField
+                        control={form.control}
+                        name="assigneeId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Assign To</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={currentUser.role === 'Volunteer'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a volunteer" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {assignableVolunteers.map(v => <SelectItem key={v.id} value={v.id}>{v.fullName}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                   )}
-                />
-              </form>
-            </Form>
+                  
+                  <FormField
+                    control={form.control}
+                    name="dueDate"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Due Date</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-[240px] pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, "PPP")
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value ?? undefined}
+                              onSelect={field.onChange}
+                              disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </form>
+              </Form>
+            </div>
           </ScrollArea>
         </div>
         <DialogFooter className="flex-shrink-0">
