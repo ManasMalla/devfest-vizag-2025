@@ -115,88 +115,88 @@ export function ApplicationDialog({ job, user, children, onApplicationSubmitted 
           </DialogDescription>
         </DialogHeader>
         <div className="flex-grow overflow-hidden">
-          <ScrollArea className="h-full pr-6">
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-semibold mb-2">Job Description</h3>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{job.description}</p>
-              </div>
-              <Separator />
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
-                        <FormControl>
-                          <Input type="tel" placeholder="+91 12345 67890" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="whatsapp"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>WhatsApp Number</FormLabel>
-                        <FormControl>
-                          <Input type="tel" placeholder="+91 12345 67890" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormItem>
-                      <FormLabel>Email Address</FormLabel>
-                      <Input value={user?.email || ''} disabled />
-                  </FormItem>
+            <ScrollArea className="h-full pr-6">
+                <div className="space-y-4">
+                <div>
+                    <h3 className="font-semibold mb-2">Job Description</h3>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{job.description}</p>
+                </div>
+                <Separator />
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                        control={form.control}
+                        name="fullName"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Full Name</FormLabel>
+                            <FormControl>
+                            <Input placeholder="John Doe" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Phone Number</FormLabel>
+                            <FormControl>
+                            <Input type="tel" placeholder="+91 12345 67890" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="whatsapp"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>WhatsApp Number</FormLabel>
+                            <FormControl>
+                            <Input type="tel" placeholder="+91 12345 67890" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormItem>
+                        <FormLabel>Email Address</FormLabel>
+                        <Input value={user?.email || ''} disabled />
+                    </FormItem>
 
-                  {job.additionalQuestions && job.additionalQuestions.length > 0 && (
-                      <div className="space-y-4 pt-4 border-t">
-                          {job.additionalQuestions.map((question, index) => (
-                              <FormItem key={index}>
-                                  <FormLabel>{question}</FormLabel>
-                                  <FormControl>
-                                      <Textarea id={`answer-${question}`} placeholder="Your answer..." />
-                                  </FormControl>
-                              </FormItem>
-                          ))}
-                      </div>
-                  )}
-
-                  <DialogFooter className="sticky bottom-0 bg-background pt-4">
-                    <DialogClose asChild>
-                      <Button type="button" variant="secondary" disabled={isSubmitting}>
-                        Cancel
-                      </Button>
-                    </DialogClose>
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Submit Application
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </div>
-          </ScrollArea>
+                    {job.additionalQuestions && job.additionalQuestions.length > 0 && (
+                        <div className="space-y-4 pt-4 border-t">
+                            {job.additionalQuestions.map((question, index) => (
+                                <FormItem key={index}>
+                                    <FormLabel>{question}</FormLabel>
+                                    <FormControl>
+                                        <Textarea id={`answer-${question}`} placeholder="Your answer..." />
+                                    </FormControl>
+                                </FormItem>
+                            ))}
+                        </div>
+                    )}
+                    {/* The footer is moved outside the scrollable area */}
+                    </form>
+                </Form>
+                </div>
+            </ScrollArea>
         </div>
+         <DialogFooter>
+            <DialogClose asChild>
+                <Button type="button" variant="secondary" disabled={isSubmitting}>
+                Cancel
+                </Button>
+            </DialogClose>
+            <Button type="submit" onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Submit Application
+            </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
