@@ -21,6 +21,8 @@ interface JobBoardProps {
   jobs: Job[];
 }
 
+const DESCRIPTION_LIMIT = 100;
+
 export default function JobBoard({ jobs }: JobBoardProps) {
   const [user, loading] = useAuthState(auth);
   const [role, setRole] = useState<UserRole>('Attendee');
@@ -92,31 +94,37 @@ export default function JobBoard({ jobs }: JobBoardProps) {
 
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
-        {jobList.map((job) => (
-          <Card key={job.id} className="flex flex-col">
-            <CardHeader>
-              <CardTitle>{job.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-grow">
-              <CardDescription className="whitespace-pre-wrap">{job.description}</CardDescription>
-            </CardContent>
-            <CardFooter>
-              {loading ? (
-                <Skeleton className="h-10 w-24" />
-              ) : user ? (
-                 appliedJobIds.has(job.id) ? (
-                   <Button disabled variant="outline">Applied</Button>
-                 ) : (
-                   <ApplicationDialog job={job} user={user} onApplicationSubmitted={handleApplicationSubmitted}>
-                      <Button>Apply Now</Button>
-                   </ApplicationDialog>
-                 )
-              ) : (
-                <Button disabled>Sign in to Apply</Button>
-              )}
-            </CardFooter>
-          </Card>
-        ))}
+        {jobList.map((job) => {
+          const truncatedDescription = job.description.length > DESCRIPTION_LIMIT
+            ? `${job.description.substring(0, DESCRIPTION_LIMIT)}...`
+            : job.description;
+
+          return (
+            <Card key={job.id} className="flex flex-col">
+              <CardHeader>
+                <CardTitle>{job.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <CardDescription className="whitespace-pre-wrap">{truncatedDescription}</CardDescription>
+              </CardContent>
+              <CardFooter>
+                {loading ? (
+                  <Skeleton className="h-10 w-24" />
+                ) : user ? (
+                  appliedJobIds.has(job.id) ? (
+                    <Button disabled variant="outline">Applied</Button>
+                  ) : (
+                    <ApplicationDialog job={job} user={user} onApplicationSubmitted={handleApplicationSubmitted}>
+                        <Button>Apply Now</Button>
+                    </ApplicationDialog>
+                  )
+                ) : (
+                  <Button disabled>Sign in to Apply</Button>
+                )}
+              </CardFooter>
+            </Card>
+          );
+        })}
       </div>
     );
   };
