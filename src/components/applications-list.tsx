@@ -115,16 +115,20 @@ export function ApplicationsList({ initialApplications, initialNextCursor, jobs,
     setIsDetailsOpen(true);
   };
 
-  const handleStatusUpdate = async (applicationId: string, newStatus: ApplicationStatus, e: React.MouseEvent) => {
+  const handleStatusUpdate = (applicationId: string, newStatus: ApplicationStatus) => {
+    setApplications((prevApps) =>
+      prevApps.map((app) =>
+        app.id === applicationId ? { ...app, status: newStatus } : app
+      )
+    );
+  };
+
+  const handleQuickStatusUpdate = async (applicationId: string, newStatus: ApplicationStatus, e: React.MouseEvent) => {
     e.stopPropagation();
     setUpdatingId(applicationId);
     const result = await updateApplicationStatus(applicationId, newStatus, token);
     if (result.success) {
-      setApplications((prevApps) =>
-        prevApps.map((app) =>
-          app.id === applicationId ? { ...app, status: newStatus } : app
-        )
-      );
+      handleStatusUpdate(applicationId, newStatus);
       toast({ title: 'Success', description: result.success });
     } else {
       toast({ variant: 'destructive', title: 'Error', description: result.error });
@@ -213,7 +217,7 @@ export function ApplicationsList({ initialApplications, initialNextCursor, jobs,
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                           {getAvailableActions(app.status).map((action) => (
-                            <DropdownMenuItem key={action} onClick={(e) => handleStatusUpdate(app.id, action, e)}>
+                            <DropdownMenuItem key={action} onClick={(e) => handleQuickStatusUpdate(app.id, action, e)}>
                               {action}
                             </DropdownMenuItem>
                           ))}
@@ -258,6 +262,8 @@ export function ApplicationsList({ initialApplications, initialNextCursor, jobs,
         application={selectedApp}
         isOpen={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
+        onStatusChange={handleStatusUpdate}
+        token={token}
       />
     </div>
   );
