@@ -68,3 +68,13 @@ export interface Task {
   createdBy: string; // UID of creator
   creatorName: string;
 }
+
+export interface AgendaItem {
+  id: string;
+  title: string;
+  speaker?: string;
+  description?: string;
+  track: string;
+  startTime: string; // HH:MM
+  endTime: string; // HH:MM
+}

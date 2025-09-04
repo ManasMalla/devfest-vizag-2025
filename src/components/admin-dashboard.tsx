@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Job, ClientJobApplication, AdminUser } from '@/types';
+import type { Job, ClientJobApplication, AdminUser, AgendaItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ApplicationsList } from './applications-list';
 import { Switch } from '@/components/ui/switch';
 import { AdminManagement } from './admin-management';
+import { AgendaManagement } from './agenda-management';
 
 
 interface AdminDashboardProps {
@@ -27,11 +28,20 @@ interface AdminDashboardProps {
   initialApplications: ClientJobApplication[];
   initialNextCursor: string | null;
   initialAdmins: AdminUser[];
+  initialAgenda: AgendaItem[];
   currentUserUid: string;
   token: string;
 }
 
-export default function AdminDashboard({ initialJobs, initialApplications, initialNextCursor, initialAdmins, currentUserUid, token }: AdminDashboardProps) {
+export default function AdminDashboard({ 
+  initialJobs, 
+  initialApplications, 
+  initialNextCursor, 
+  initialAdmins, 
+  initialAgenda,
+  currentUserUid, 
+  token 
+}: AdminDashboardProps) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -89,9 +99,10 @@ export default function AdminDashboard({ initialJobs, initialApplications, initi
 
   return (
      <Tabs defaultValue="applications" className="w-full">
-      <TabsList className="grid w-full max-w-lg mx-auto grid-cols-3">
+      <TabsList className="grid w-full max-w-xl mx-auto grid-cols-4">
         <TabsTrigger value="applications">Applications</TabsTrigger>
         <TabsTrigger value="jobs">Job Postings</TabsTrigger>
+        <TabsTrigger value="agenda">Agenda</TabsTrigger>
         <TabsTrigger value="admins">Admins</TabsTrigger>
       </TabsList>
       <TabsContent value="applications" className="mt-6">
@@ -196,6 +207,9 @@ export default function AdminDashboard({ initialJobs, initialApplications, initi
           onFormSubmit={onFormSubmit}
         />
       </TabsContent>
+      <TabsContent value="agenda" className="mt-6">
+        <AgendaManagement initialAgendaItems={initialAgenda} token={token} />
+      </TabsContent>
       <TabsContent value="admins" className="mt-6">
         <AdminManagement
           initialAdmins={initialAdmins}
@@ -206,5 +220,3 @@ export default function AdminDashboard({ initialJobs, initialApplications, initi
     </Tabs>
   );
 }
-
-    

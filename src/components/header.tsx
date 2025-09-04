@@ -14,6 +14,7 @@ import { DevFestLogo } from './logo';
 
 const allNavLinks = [
   { key: 'home', href: '/', label: 'Home' },
+  { key: 'agenda', href: '/agenda', label: 'Agenda' },
   { key: 'volunteer', href: '/volunteer', label: 'Volunteer' },
   { key: 'sessions', href: '/sessions', label: 'Session Ideas' },
   { key: 'speakers', href: '/speakers', label: 'Speakers' },
