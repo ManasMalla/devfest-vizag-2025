@@ -1,3 +1,5 @@
+'use server';
+
 import type { Timestamp } from "firebase-admin/firestore";
 
 export interface Job {
@@ -67,6 +69,11 @@ export interface Task {
   createdAt: string; // ISO string
   createdBy: string; // UID of creator
   creatorName: string;
+}
+
+export interface AgendaTrack {
+  id: string;
+  name: string;
 }
 
 export interface AgendaItem {

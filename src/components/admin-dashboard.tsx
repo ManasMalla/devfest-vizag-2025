@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Job, ClientJobApplication, AdminUser, AgendaItem } from '@/types';
+import type { Job, ClientJobApplication, AdminUser, AgendaItem, AgendaTrack } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +29,7 @@ interface AdminDashboardProps {
   initialNextCursor: string | null;
   initialAdmins: AdminUser[];
   initialAgenda: AgendaItem[];
+  initialAgendaTracks: AgendaTrack[];
   currentUserUid: string;
   token: string;
 }
@@ -39,6 +40,7 @@ export default function AdminDashboard({
   initialNextCursor, 
   initialAdmins, 
   initialAgenda,
+  initialAgendaTracks,
   currentUserUid, 
   token 
 }: AdminDashboardProps) {
@@ -208,7 +210,11 @@ export default function AdminDashboard({
         />
       </TabsContent>
       <TabsContent value="agenda" className="mt-6">
-        <AgendaManagement initialAgendaItems={initialAgenda} token={token} />
+        <AgendaManagement 
+          initialAgendaItems={initialAgenda} 
+          initialTracks={initialAgendaTracks}
+          token={token} 
+        />
       </TabsContent>
       <TabsContent value="admins" className="mt-6">
         <AdminManagement

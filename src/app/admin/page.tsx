@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
 import { getJobs, isAdmin, getApplications, getAdmins } from "@/app/volunteer/actions";
-import { getAgenda } from '@/app/agenda/actions';
+import { getAgenda, getAgendaTracks } from '@/app/agenda/actions';
 import AdminDashboard from "@/components/admin-dashboard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Terminal } from "lucide-react";
-import type { Job, ClientJobApplication, AdminUser, AgendaItem } from '@/types';
+import type { Job, ClientJobApplication, AdminUser, AgendaItem, AgendaTrack } from '@/types';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -25,6 +25,7 @@ export default function AdminPage() {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [agenda, setAgenda] = useState<AgendaItem[]>([]);
+  const [agendaTracks, setAgendaTracks] = useState<AgendaTrack[]>([]);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -33,11 +34,18 @@ export default function AdminPage() {
           const idToken = await user.getIdToken();
           const adminCheck = await isAdmin(idToken);
           if (adminCheck.isAdmin) {
-            const [initialJobs, initialApplicationsData, initialAdminsData, initialAgendaData] = await Promise.all([
+            const [
+                initialJobs, 
+                initialApplicationsData, 
+                initialAdminsData, 
+                initialAgendaData,
+                initialAgendaTracksData
+            ] = await Promise.all([
               getJobs(),
               getApplications(idToken, { status: 'All', jobTitle: 'All' }, { limit: ITEMS_PER_PAGE }),
               getAdmins(idToken),
-              getAgenda()
+              getAgenda(),
+              getAgendaTracks()
             ]);
             setJobs(initialJobs);
             setApplications(initialApplicationsData.applications);
@@ -48,6 +56,7 @@ export default function AdminPage() {
               console.error("Error fetching admins:", initialAdminsData.error);
             }
             setAgenda(initialAgendaData);
+            setAgendaTracks(initialAgendaTracksData);
             setStatus({ isLoading: false, isAuthorized: true, token: idToken, uid: user.uid });
           } else {
             setStatus({ isLoading: false, isAuthorized: false, token: '', uid: '' });
@@ -103,6 +112,7 @@ export default function AdminPage() {
         initialNextCursor={nextCursor}
         initialAdmins={admins}
         initialAgenda={agenda}
+        initialAgendaTracks={agendaTracks}
         currentUserUid={status.uid}
         token={status.token}
       />
