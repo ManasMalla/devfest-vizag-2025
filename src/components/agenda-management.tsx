@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -239,7 +240,23 @@ export function AgendaManagement({ initialAgendaItems, initialTracks, token }: A
     reset({ name: track.name });
   }
 
-  const sortedItems = [...agendaItems].sort((a, b) => a.startTime.localeCompare(b.startTime) || a.trackName.localeCompare(b.trackName));
+  const groupedItems = useMemo(() => {
+    const groups: { [key: string]: AgendaItem[] } = {};
+    agendaItems.forEach(item => {
+        const trackKey = item.trackName || 'Unassigned';
+        if (!groups[trackKey]) {
+            groups[trackKey] = [];
+        }
+        groups[trackKey].push(item);
+    });
+
+    Object.values(groups).forEach(group => {
+        group.sort((a, b) => a.startTime.localeCompare(b.startTime));
+    });
+
+    return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [agendaItems]);
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -248,61 +265,71 @@ export function AgendaManagement({ initialAgendaItems, initialTracks, token }: A
             <h2 className="text-2xl font-bold">Agenda Sessions</h2>
             <Button onClick={handleAdd}><PlusCircle className="mr-2 h-4 w-4" /> Add Item</Button>
         </div>
-        <div className="rounded-lg border">
-            <Table>
-            <TableHeader>
-                <TableRow>
-                <TableHead>Time</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Speaker</TableHead>
-                <TableHead>Track</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {sortedItems.map((item) => (
-                <TableRow key={item.id}>
-                    <TableCell>
-                        <Badge variant="outline" className="flex items-center gap-1.5 whitespace-nowrap">
-                            <Clock className="h-3 w-3"/>{item.startTime} - {item.endTime}
-                        </Badge>
-                    </TableCell>
-                    <TableCell className="font-medium">{item.title}</TableCell>
-                    <TableCell>{item.speaker || 'N/A'}</TableCell>
-                    <TableCell><Badge variant="secondary">{item.trackName}</Badge></TableCell>
-                    <TableCell className="text-right">
-                    <AlertDialog>
-                        <DropdownMenu>
-                        <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><span className="sr-only">Open menu</span><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEdit(item)}><Pencil className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
-                            <AlertDialogTrigger asChild><DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive"><Trash2 className="mr-2 h-4 w-4" />Delete</DropdownMenuItem></AlertDialogTrigger>
-                        </DropdownMenuContent>
-                        </DropdownMenu>
-                        <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>This will permanently delete the agenda item "{item.title}".</AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(item.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                        </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                    </TableCell>
-                </TableRow>
-                ))}
-                {sortedItems.length === 0 && (
-                    <TableRow>
-                        <TableCell colSpan={5} className="h-24 text-center">
-                            No agenda items have been created yet.
-                        </TableCell>
-                    </TableRow>
-                )}
-            </TableBody>
-            </Table>
-        </div>
+        
+        {groupedItems.length > 0 ? (
+            groupedItems.map(([trackName, items]) => (
+                <Card key={trackName}>
+                    <CardHeader>
+                        <CardTitle>{trackName}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="rounded-lg border">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Time</TableHead>
+                                        <TableHead>Title</TableHead>
+                                        <TableHead>Speaker</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {items.map((item) => (
+                                        <TableRow key={item.id}>
+                                            <TableCell>
+                                                <Badge variant="outline" className="flex items-center gap-1.5 whitespace-nowrap">
+                                                    <Clock className="h-3 w-3"/>{item.startTime} - {item.endTime}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                              <div className="font-medium">{item.title}</div>
+                                              {item.category && <Badge variant="secondary" className="mt-1">{item.category}</Badge>}
+                                            </TableCell>
+                                            <TableCell>{item.speaker || 'N/A'}</TableCell>
+                                            <TableCell className="text-right">
+                                                <AlertDialog>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><span className="sr-only">Open menu</span><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem onClick={() => handleEdit(item)}><Pencil className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+                                                            <AlertDialogTrigger asChild><DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive"><Trash2 className="mr-2 h-4 w-4" />Delete</DropdownMenuItem></AlertDialogTrigger>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                            <AlertDialogDescription>This will permanently delete the agenda item "{item.title}".</AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => handleDelete(item.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </CardContent>
+                </Card>
+            ))
+        ) : (
+            <div className="text-center py-16 border rounded-lg">
+                <p className="text-muted-foreground text-lg">No agenda items have been created yet.</p>
+            </div>
+        )}
       </div>
 
       <Card>
