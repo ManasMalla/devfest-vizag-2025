@@ -74,7 +74,7 @@ export interface AgendaTrack {
   name: string;
 }
 
-export const agendaCategories = ['Cloud', 'AI', 'Web', 'Mobile', 'Firebase', 'Other'] as const;
+export const agendaCategories = ['Cloud', 'AI', 'Web', 'Mobile', 'Firebase', 'Entrepreneurship', 'Other'] as const;
 export type AgendaCategory = (typeof agendaCategories)[number];
 
 export interface AgendaItem {
