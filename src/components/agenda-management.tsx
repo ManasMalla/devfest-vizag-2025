@@ -30,7 +30,7 @@ const AgendaItemSchema = z.object({
   title: z.string().min(3, 'Title is required.'),
   speaker: z.string().optional(),
   description: z.string().optional(),
-  track: z.string().min(1, 'A track must be selected.'),
+  trackId: z.string().min(1, 'A track must be selected.'),
   startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Start time must be in HH:MM format.'),
   endTime: z.string().regex(/^\d{2}:\d{2}$/, 'End time must be in HH:MM format.'),
 }).refine(data => data.endTime > data.startTime, {
@@ -59,7 +59,7 @@ function AgendaForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<AgendaFormValues>({
     resolver: zodResolver(AgendaItemSchema),
-    defaultValues: item || { title: '', speaker: '', description: '', track: '', startTime: '09:00', endTime: '10:00' },
+    defaultValues: item ? { ...item, trackId: item.trackId } : { title: '', speaker: '', description: '', trackId: '', startTime: '09:00', endTime: '10:00' },
   });
 
   const onSubmit = async (values: AgendaFormValues) => {
@@ -80,7 +80,6 @@ function AgendaForm({
       onSave();
       setIsOpen(false);
     } else {
-      console.log(result.details);
       toast({ variant: 'destructive', title: 'Error', description: result.error });
     }
     setIsSubmitting(false);
@@ -99,7 +98,7 @@ function AgendaForm({
             <FormField control={form.control} name="speaker" render={({ field }) => ( <FormItem><FormLabel>Speaker</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
             <FormField
               control={form.control}
-              name="track"
+              name="trackId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Track</FormLabel>
@@ -111,7 +110,7 @@ function AgendaForm({
                     </FormControl>
                     <SelectContent>
                       {tracks.map(track => (
-                        <SelectItem key={track.id} value={track.name}>
+                        <SelectItem key={track.id} value={track.id}>
                           {track.name}
                         </SelectItem>
                       ))}
@@ -137,20 +136,22 @@ function AgendaForm({
   );
 }
 
-const AddTrackSchema = z.object({
+const TrackSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(1, 'Track name cannot be empty.'),
 });
-type AddTrackFormValues = z.infer<typeof AddTrackSchema>;
+type TrackFormValues = z.infer<typeof TrackSchema>;
 
 export function AgendaManagement({ initialAgendaItems, initialTracks, token }: AgendaManagementProps) {
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>(initialAgendaItems);
   const [tracks, setTracks] = useState<AgendaTrack[]>(initialTracks);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
+  const [editingTrack, setEditingTrack] = useState<AgendaTrack | null>(null);
   const { toast } = useToast();
   
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<AddTrackFormValues>({
-    resolver: zodResolver(AddTrackSchema),
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<TrackFormValues>({
+    resolver: zodResolver(TrackSchema),
   });
 
   const handleRefresh = async () => {
@@ -179,13 +180,17 @@ export function AgendaManagement({ initialAgendaItems, initialTracks, token }: A
     }
   };
 
-  const onAddTrack = async (data: AddTrackFormValues) => {
+  const onManageTrack = async (data: TrackFormValues) => {
     const formData = new FormData();
     formData.append('name', data.name);
+    if (editingTrack?.id) {
+        formData.append('id', editingTrack.id);
+    }
     const result = await manageAgendaTrack(formData, token);
     if (result.success) {
-        toast({ title: 'Success', description: 'Track created.' });
-        reset();
+        toast({ title: 'Success', description: `Track ${editingTrack ? 'updated' : 'created'}.` });
+        reset({ name: '' });
+        setEditingTrack(null);
         handleRefresh();
     } else {
         toast({ variant: 'destructive', title: 'Error', description: result.error });
@@ -202,7 +207,12 @@ export function AgendaManagement({ initialAgendaItems, initialTracks, token }: A
     }
   }
 
-  const sortedItems = [...agendaItems].sort((a, b) => a.startTime.localeCompare(b.startTime) || a.track.localeCompare(b.track));
+  const handleEditTrack = (track: AgendaTrack) => {
+    setEditingTrack(track);
+    reset({ name: track.name });
+  }
+
+  const sortedItems = [...agendaItems].sort((a, b) => a.startTime.localeCompare(b.startTime) || a.trackName.localeCompare(b.trackName));
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -232,7 +242,7 @@ export function AgendaManagement({ initialAgendaItems, initialTracks, token }: A
                     </TableCell>
                     <TableCell className="font-medium">{item.title}</TableCell>
                     <TableCell>{item.speaker || 'N/A'}</TableCell>
-                    <TableCell><Badge variant="secondary">{item.track}</Badge></TableCell>
+                    <TableCell><Badge variant="secondary">{item.trackName}</Badge></TableCell>
                     <TableCell className="text-right">
                     <AlertDialog>
                         <DropdownMenu>
@@ -270,37 +280,43 @@ export function AgendaManagement({ initialAgendaItems, initialTracks, token }: A
 
       <Card>
         <CardHeader>
-            <CardTitle>Manage Tracks</CardTitle>
+            <CardTitle>{editingTrack ? 'Edit Track' : 'Manage Tracks'}</CardTitle>
         </CardHeader>
         <CardContent>
-            <form onSubmit={handleSubmit(onAddTrack)} className="flex items-start gap-2 mb-4">
+            <form onSubmit={handleSubmit(onManageTrack)} className="flex items-start gap-2 mb-4">
                 <div className="flex-grow">
-                    <Input placeholder="New track name..." {...register('name')} />
+                    <Input placeholder="Track name..." {...register('name')} />
                     {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
                 </div>
-                <Button type="submit">Add</Button>
+                <Button type="submit">{editingTrack ? 'Save' : 'Add'}</Button>
+                {editingTrack && <Button type="button" variant="ghost" onClick={() => { setEditingTrack(null); reset({name: ''});}}>Cancel</Button>}
             </form>
             <div className="space-y-2">
                 {tracks.map(track => (
                     <div key={track.id} className="flex items-center justify-between p-2 rounded-md bg-secondary">
                         <span className="text-sm font-medium">{track.name}</span>
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive">
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete "{track.name}"?</AlertDialogTitle>
-                                    <AlertDialogDescription>This will not delete existing sessions, but the track will no longer be available for new sessions.</AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => onDeleteTrack(track.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                        <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary" onClick={() => handleEditTrack(track)}>
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive">
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Delete "{track.name}"?</AlertDialogTitle>
+                                        <AlertDialogDescription>This action cannot be undone. You can only delete tracks that are not being used by any agenda session.</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => onDeleteTrack(track.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
                     </div>
                 ))}
                  {tracks.length === 0 && (

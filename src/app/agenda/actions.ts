@@ -11,7 +11,7 @@ const AgendaItemSchema = z.object({
   title: z.string().min(3, 'Title is required.'),
   speaker: z.string().optional(),
   description: z.string().optional(),
-  track: z.string().min(1, 'A track must be selected.'),
+  trackId: z.string().min(1, 'A track must be selected.'),
   startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Start time must be in HH:MM format.'),
   endTime: z.string().regex(/^\d{2}:\d{2}$/, 'End time must be in HH:MM format.'),
 }).refine(data => data.endTime > data.startTime, {
@@ -20,6 +20,7 @@ const AgendaItemSchema = z.object({
 });
 
 const AgendaTrackSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(1, 'Track name cannot be empty.'),
 });
 
@@ -48,13 +49,21 @@ export async function manageAgendaItem(formData: FormData, token: string) {
     return { error: 'Invalid data', details: errorDetails };
   }
 
-  const { id, ...itemData } = validation.data;
+  const { id, trackId, ...itemData } = validation.data;
+  
+  const trackDoc = await adminDb.collection('agendaTracks').doc(trackId).get();
+  if (!trackDoc.exists) {
+    return { error: 'Selected track does not exist.' };
+  }
+  const trackName = trackDoc.data()?.name;
+
+  const finalItemData = { ...itemData, trackId, trackName };
 
   try {
     if (id) {
-      await adminDb.collection('agenda').doc(id).update(itemData);
+      await adminDb.collection('agenda').doc(id).update(finalItemData);
     } else {
-      await adminDb.collection('agenda').add(itemData);
+      await adminDb.collection('agenda').add(finalItemData);
     }
     revalidatePath('/agenda');
     revalidatePath('/admin');
@@ -103,12 +112,32 @@ export async function manageAgendaTrack(formData: FormData, token: string) {
     if (!validation.success) {
         return { error: 'Invalid data', details: validation.error.flatten().fieldErrors };
     }
+    
+    const { id, name } = validation.data;
 
     try {
-        await adminDb.collection('agendaTracks').add(validation.data);
+        if (id) {
+            // Update existing track and denormalized data in agenda items
+            const trackRef = adminDb.collection('agendaTracks').doc(id);
+            const batch = adminDb.batch();
+            
+            batch.update(trackRef, { name });
+
+            const itemsToUpdateSnapshot = await adminDb.collection('agenda').where('trackId', '==', id).get();
+            itemsToUpdateSnapshot.docs.forEach(doc => {
+                batch.update(doc.ref, { trackName: name });
+            });
+            
+            await batch.commit();
+        } else {
+            // Add new track
+            await adminDb.collection('agendaTracks').add({ name });
+        }
         revalidatePath('/admin');
+        revalidatePath('/agenda');
         return { success: true };
     } catch (error) {
+        console.error("Error managing agenda track: ", error);
         return { error: 'Failed to save track.' };
     }
 }
@@ -118,10 +147,16 @@ export async function deleteAgendaTrack(id: string, token: string) {
     if (!adminCheck.isAdmin) return { error: 'Unauthorized' };
     
     try {
+        const itemsInTrack = await adminDb.collection('agenda').where('trackId', '==', id).limit(1).get();
+        if (!itemsInTrack.empty) {
+            return { error: 'Cannot delete track. It is currently in use by one or more agenda items.' };
+        }
+        
         await adminDb.collection('agendaTracks').doc(id).delete();
         revalidatePath('/admin');
         return { success: true };
     } catch (error) {
+        console.error("Error deleting agenda track: ", error);
         return { error: 'Failed to delete track.' };
     }
 }

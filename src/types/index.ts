@@ -81,7 +81,8 @@ export interface AgendaItem {
   title: string;
   speaker?: string;
   description?: string;
-  track: string;
+  trackId: string;
+  trackName: string; // Denormalized for easier display
   startTime: string; // HH:MM
   endTime: string; // HH:MM
 }

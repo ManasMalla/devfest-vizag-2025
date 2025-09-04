@@ -10,10 +10,11 @@ export const dynamic = 'force-dynamic';
 function processAgenda(agendaItems: AgendaItem[]) {
   const tracks: { [key: string]: AgendaItem[] } = {};
   agendaItems.forEach(item => {
-    if (!tracks[item.track]) {
-      tracks[item.track] = [];
+    const trackKey = item.trackName || 'Unassigned';
+    if (!tracks[trackKey]) {
+      tracks[trackKey] = [];
     }
-    tracks[item.track].push(item);
+    tracks[trackKey].push(item);
   });
 
   // Sort sessions within each track by start time
@@ -57,21 +58,23 @@ export default async function AgendaPage() {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-lg mb-2">{item.title}</CardTitle>
-                      <Badge variant="secondary" className="flex-shrink-0">
-                        <Clock className="mr-1.5" />
+                      <Badge variant="secondary" className="flex-shrink-0 ml-2">
+                        <Clock className="mr-1.5 h-4 w-4" />
                         {item.startTime} - {item.endTime}
                       </Badge>
                     </div>
                     {item.speaker && (
                         <div className="flex items-center text-sm text-muted-foreground">
-                            <User className="mr-2" />
+                            <User className="mr-2 h-4 w-4" />
                             <span>{item.speaker}</span>
                         </div>
                     )}
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">{item.description}</p>
-                  </CardContent>
+                  {item.description && (
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                    </CardContent>
+                  )}
                 </Card>
               ))}
             </div>
