@@ -56,15 +56,18 @@ export default async function AgendaPage() {
               {tracks[trackName].map(item => (
                 <Card key={item.id}>
                   <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg mb-2">{item.title}</CardTitle>
-                      <Badge variant="secondary" className="flex-shrink-0 ml-2">
-                        <Clock className="mr-1.5 h-4 w-4" />
-                        {item.startTime} - {item.endTime}
-                      </Badge>
+                    <div className="flex justify-between items-start gap-2">
+                        <div className="flex-grow">
+                            <CardTitle className="text-lg mb-2">{item.title}</CardTitle>
+                            {item.category && <Badge variant="outline">{item.category}</Badge>}
+                        </div>
+                        <Badge variant="secondary" className="flex-shrink-0">
+                            <Clock className="mr-1.5 h-4 w-4" />
+                            {item.startTime} - {item.endTime}
+                        </Badge>
                     </div>
                     {item.speaker && (
-                        <div className="flex items-center text-sm text-muted-foreground">
+                        <div className="flex items-center text-sm text-muted-foreground pt-2">
                             <User className="mr-2 h-4 w-4" />
                             <span>{item.speaker}</span>
                         </div>

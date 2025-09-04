@@ -76,6 +76,9 @@ export interface AgendaTrack {
   name: string;
 }
 
+export const agendaCategories = ['Cloud', 'AI', 'Web', 'Mobile', 'Firebase', 'Other'] as const;
+export type AgendaCategory = (typeof agendaCategories)[number];
+
 export interface AgendaItem {
   id: string;
   title: string;
@@ -85,4 +88,5 @@ export interface AgendaItem {
   trackName: string; // Denormalized for easier display
   startTime: string; // HH:MM
   endTime: string; // HH:MM
+  category?: AgendaCategory;
 }
