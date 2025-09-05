@@ -2,15 +2,15 @@
 
 import { Button } from "@/components/ui/button";
 import { Gallery } from "@/components/gallery";
-import { Instagram, Users } from "lucide-react";
+import { Instagram, Users, Calendar, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
 import { Skeleton } from "@/components/ui/skeleton";
-import { AuthButton } from "@/components/auth-button";
 import config from '@/config.json';
 import { PastSponsors } from "@/components/past-sponsors";
 import { AnnouncementBanner } from "@/components/announcement-banner";
+import { DevFestLogo } from "@/components/logo";
 
 export default function Home() {
   const [user, loading] = auth ? useAuthState(auth) : [null, true];
@@ -23,7 +23,7 @@ export default function Home() {
       return <Skeleton className="h-7 w-96 max-w-full" />;
     }
     if (user) {
-      return `Welcome back, ${user.displayName}! We'll keep you updated.`;
+      return `Welcome back, ${user.displayName}! We'll keep you updated on ticket availability.`;
     }
     return 'DevFest Vizag 2025 is on its way. Sign in to get notified and stay updated!';
   };
@@ -32,19 +32,28 @@ export default function Home() {
     <div className="flex flex-grow flex-col items-center animate-fade-in-up w-full">
       <AnnouncementBanner />
       <div className="z-10 flex flex-col items-center justify-center p-4 text-center pt-16 pb-12">
-        <div className="animate-pulse bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-5xl md:text-7xl font-extrabold text-transparent py-2">
-          Coming Soon
-        </div>
-        <div className="mt-6 mb-8 text-base md:text-lg text-muted-foreground max-w-lg min-h-[28px] flex items-center justify-center">
-          {renderWelcomeMessage()}
+        
+        <DevFestLogo className="h-12 md:h-16 w-auto mb-6" />
+
+        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+          Join us for the largest developer conference in Visakhapatnam, featuring expert speakers, hands-on workshops, and networking opportunities with the best in tech.
+        </p>
+        
+        <div className="mt-8 flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-muted-foreground">
+            <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <span>Date: TBD</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                <span>Venue: TBD</span>
+            </div>
         </div>
 
         <div className="mt-8 flex flex-col items-center gap-4">
-          {!loading && !user && (
-            <div className="flex flex-col items-center gap-4 mb-4">
-              <AuthButton />
-            </div>
-          )}
+          <Button size="lg" disabled>
+            Tickets Opening Soon
+          </Button>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button asChild variant="outline">
               <Link href={config.socials.instagram} target="_blank" rel="noopener noreferrer">
