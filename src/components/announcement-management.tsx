@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import { Loader2, PlusCircle, Pencil, Trash2 } from 'lucide-react';
 import { MarkdownPreview } from './markdown-preview';
+import { Label } from './ui/label';
 
 interface AnnouncementManagementProps {
   initialAnnouncements: Announcement[];
