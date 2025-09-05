@@ -88,3 +88,9 @@ export interface AgendaItem {
   endTime: string; // HH:MM
   category?: AgendaCategory;
 }
+
+export interface Announcement {
+  id: string;
+  content: string;
+  createdAt: string; // ISO string date
+}

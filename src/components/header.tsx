@@ -11,6 +11,7 @@ import { ThemeToggle } from './theme-toggle'
 import { AuthButton } from './auth-button'
 import config from '@/config.json';
 import { DevFestLogo } from './logo';
+import { AnnouncementPopover } from './announcement-popover';
 
 const allNavLinks = [
   { key: 'home', href: '/', label: 'Home' },
@@ -88,6 +89,7 @@ export function Header() {
         </div>
         
         <div className="flex items-center justify-end">
+          <AnnouncementPopover />
           <AuthButton />
           <ThemeToggle />
         </div>

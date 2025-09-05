@@ -5,10 +5,11 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
 import { getJobs, isAdmin, getApplications, getAdmins } from "@/app/volunteer/actions";
 import { getAgenda, getAgendaTracks } from '@/app/agenda/actions';
+import { getAnnouncements } from '@/app/announcements/actions';
 import AdminDashboard from "@/components/admin-dashboard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Terminal } from "lucide-react";
-import type { Job, ClientJobApplication, AdminUser, AgendaItem, AgendaTrack } from '@/types';
+import type { Job, ClientJobApplication, AdminUser, AgendaItem, AgendaTrack, Announcement } from '@/types';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -26,6 +27,7 @@ export default function AdminPage() {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [agenda, setAgenda] = useState<AgendaItem[]>([]);
   const [agendaTracks, setAgendaTracks] = useState<AgendaTrack[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -39,13 +41,15 @@ export default function AdminPage() {
                 initialApplicationsData, 
                 initialAdminsData, 
                 initialAgendaData,
-                initialAgendaTracksData
+                initialAgendaTracksData,
+                initialAnnouncementsData
             ] = await Promise.all([
               getJobs(),
               getApplications(idToken, { status: 'All', jobTitle: 'All' }, { limit: ITEMS_PER_PAGE }),
               getAdmins(idToken),
               getAgenda(),
-              getAgendaTracks()
+              getAgendaTracks(),
+              getAnnouncements()
             ]);
             setJobs(initialJobs);
             setApplications(initialApplicationsData.applications);
@@ -57,6 +61,7 @@ export default function AdminPage() {
             }
             setAgenda(initialAgendaData);
             setAgendaTracks(initialAgendaTracksData);
+            setAnnouncements(initialAnnouncementsData);
             setStatus({ isLoading: false, isAuthorized: true, token: idToken, uid: user.uid });
           } else {
             setStatus({ isLoading: false, isAuthorized: false, token: '', uid: '' });
@@ -113,6 +118,7 @@ export default function AdminPage() {
         initialAdmins={admins}
         initialAgenda={agenda}
         initialAgendaTracks={agendaTracks}
+        initialAnnouncements={announcements}
         currentUserUid={status.uid}
         token={status.token}
       />

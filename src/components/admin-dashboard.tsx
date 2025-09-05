@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Job, ClientJobApplication, AdminUser, AgendaItem, AgendaTrack } from '@/types';
+import type { Job, ClientJobApplication, AdminUser, AgendaItem, AgendaTrack, Announcement } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +21,7 @@ import { ApplicationsList } from './applications-list';
 import { Switch } from '@/components/ui/switch';
 import { AdminManagement } from './admin-management';
 import { AgendaManagement } from './agenda-management';
+import { AnnouncementManagement } from './announcement-management';
 
 
 interface AdminDashboardProps {
@@ -30,6 +31,7 @@ interface AdminDashboardProps {
   initialAdmins: AdminUser[];
   initialAgenda: AgendaItem[];
   initialAgendaTracks: AgendaTrack[];
+  initialAnnouncements: Announcement[];
   currentUserUid: string;
   token: string;
 }
@@ -41,6 +43,7 @@ export default function AdminDashboard({
   initialAdmins, 
   initialAgenda,
   initialAgendaTracks,
+  initialAnnouncements,
   currentUserUid, 
   token 
 }: AdminDashboardProps) {
@@ -101,10 +104,11 @@ export default function AdminDashboard({
 
   return (
      <Tabs defaultValue="applications" className="w-full">
-      <TabsList className="grid w-full max-w-xl mx-auto grid-cols-4">
+      <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-5">
         <TabsTrigger value="applications">Applications</TabsTrigger>
         <TabsTrigger value="jobs">Job Postings</TabsTrigger>
         <TabsTrigger value="agenda">Agenda</TabsTrigger>
+        <TabsTrigger value="announcements">Announcements</TabsTrigger>
         <TabsTrigger value="admins">Admins</TabsTrigger>
       </TabsList>
       <TabsContent value="applications" className="mt-6">
@@ -214,6 +218,12 @@ export default function AdminDashboard({
           initialAgendaItems={initialAgenda} 
           initialTracks={initialAgendaTracks}
           token={token} 
+        />
+      </TabsContent>
+      <TabsContent value="announcements" className="mt-6">
+        <AnnouncementManagement
+          initialAnnouncements={initialAnnouncements}
+          token={token}
         />
       </TabsContent>
       <TabsContent value="admins" className="mt-6">

@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AuthButton } from "@/components/auth-button";
 import config from '@/config.json';
 import { PastSponsors } from "@/components/past-sponsors";
+import { AnnouncementBanner } from "@/components/announcement-banner";
 
 export default function Home() {
   const [user, loading] = auth ? useAuthState(auth) : [null, true];
@@ -29,6 +30,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-grow flex-col items-center animate-fade-in-up w-full">
+      <AnnouncementBanner />
       <div className="z-10 flex flex-col items-center justify-center p-4 text-center pt-16 pb-12">
         <div className="animate-pulse bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-5xl md:text-7xl font-extrabold text-transparent py-2">
           Coming Soon
