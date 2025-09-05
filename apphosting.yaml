@@ -24,3 +24,6 @@ env:
   
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
     value: 1:803340480784:web:dc7b2206a050a2ac643595
+  
+  - variable: NEXT_PUBLIC_FIREBASE_VAPID_KEY
+    value: "" # Paste your generated VAPID key here
