@@ -1,6 +1,6 @@
 'use server';
 
-import { adminDb } from '@/lib/firebase-admin';
+import { adminDb, adminMessaging } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { z } from 'zod';
 import { isAdmin } from '../volunteer/actions';
@@ -45,14 +45,41 @@ export async function manageAnnouncement(formData: FormData, token: string) {
   const { id, content } = validation.data;
 
   try {
+    let isNewAnnouncement = false;
     if (id) {
       await adminDb.collection('announcements').doc(id).update({ content });
     } else {
+      isNewAnnouncement = true;
       await adminDb.collection('announcements').add({ 
         content,
         createdAt: FieldValue.serverTimestamp(),
       });
     }
+
+    if (isNewAnnouncement) {
+      try {
+        const message = {
+          notification: {
+            title: 'New DevFest Vizag Announcement!',
+            body: content.substring(0, 100) + (content.length > 100 ? '...' : ''),
+          },
+          webpush: {
+            fcmOptions: {
+              link: '/',
+            },
+            notification: {
+              icon: '/icons/icon-192x192.png',
+            },
+          },
+          topic: 'all_users',
+        };
+        await adminMessaging.send(message);
+        console.log('Successfully sent push notification.');
+      } catch (fcmError) {
+        console.error('Error sending FCM message:', fcmError);
+      }
+    }
+
     revalidatePath('/');
     revalidatePath('/admin');
     return { success: true };
@@ -76,5 +103,20 @@ export async function deleteAnnouncement(id: string, token: string) {
   } catch (error) {
     console.error("Error deleting announcement:", error);
     return { error: 'Failed to delete announcement.' };
+  }
+}
+
+export async function subscribeToTopic(token: string, fcmToken: string) {
+  const adminCheck = await isAdmin(token); // Use this for user verification if needed, or implement your own logic
+  if (!adminCheck.isAdmin && !fcmToken) { // Example check
+    return { error: 'Unauthorized or missing token' };
+  }
+  
+  try {
+    await adminMessaging.subscribeToTopic(fcmToken, 'all_users');
+    return { success: true };
+  } catch (error) {
+    console.error('Error subscribing to topic:', error);
+    return { error: 'Failed to subscribe' };
   }
 }
