@@ -21,10 +21,12 @@ import { useEffect, useState } from 'react';
 import type { UserRole } from '@/types';
 import { getUserRole } from '@/app/volunteer/actions';
 import { Badge } from '@/components/ui/badge';
+import { LoginDialog } from './login-dialog';
 
 export function AuthButton() {
   const [user, loading, error] = auth ? useAuthState(auth) : [null, true, undefined];
   const [role, setRole] = useState<UserRole | null>(null);
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchRole = async () => {
@@ -123,11 +125,12 @@ export function AuthButton() {
   }
 
   return (
-    <Button asChild variant="outline">
-      <Link href="/login">
+    <>
+      <Button variant="outline" onClick={() => setIsLoginDialogOpen(true)}>
         <LogIn />
         Login
-      </Link>
-    </Button>
+      </Button>
+      <LoginDialog isOpen={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen} />
+    </>
   );
 }

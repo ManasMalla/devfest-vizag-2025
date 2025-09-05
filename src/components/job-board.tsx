@@ -16,6 +16,7 @@ import { Badge } from './ui/badge';
 import { Loader2, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { LoginDialog } from './login-dialog';
 
 interface JobBoardProps {
   jobs: Job[];
@@ -30,6 +31,7 @@ export default function JobBoard({ jobs }: JobBoardProps) {
   const [userApplications, setUserApplications] = useState<ClientJobApplication[]>([]);
   const [isLoadingApps, setIsLoadingApps] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -119,7 +121,7 @@ export default function JobBoard({ jobs }: JobBoardProps) {
                     </ApplicationDialog>
                   )
                 ) : (
-                  <Button disabled>Sign in to Apply</Button>
+                  <Button onClick={() => setIsLoginDialogOpen(true)}>Sign in to Apply</Button>
                 )}
               </CardFooter>
             </Card>
@@ -133,6 +135,7 @@ export default function JobBoard({ jobs }: JobBoardProps) {
 
   return (
     <>
+      <LoginDialog isOpen={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen} />
       {isTeamMember && (
         <Alert className="mb-8 max-w-4xl mx-auto">
           <AlertTitle className="font-bold">Welcome to the Team!</AlertTitle>

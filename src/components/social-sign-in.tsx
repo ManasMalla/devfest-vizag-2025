@@ -1,3 +1,4 @@
+
 'use client';
 
 import { GoogleAuthProvider, signInWithPopup, type AuthError } from 'firebase/auth';
@@ -6,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 
 function GoogleIcon() {
   return (
@@ -36,10 +36,13 @@ function GoogleIcon() {
   );
 }
 
-export function SocialSignIn() {
+interface SocialSignInProps {
+  onLoginSuccess?: () => void;
+}
+
+export function SocialSignIn({ onLoginSuccess }: SocialSignInProps) {
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
-    const router = useRouter();
 
     const handleSignIn = async () => {
         if (!auth) return;
@@ -48,7 +51,7 @@ export function SocialSignIn() {
         try {
             await signInWithPopup(auth, provider);
             toast({ title: "Signed In", description: "Welcome!" });
-            router.push('/');
+            onLoginSuccess?.();
         } catch (error) {
             const authError = error as AuthError;
             console.error('Error signing in with Google', authError);

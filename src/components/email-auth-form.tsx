@@ -1,7 +1,7 @@
+
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -33,11 +33,14 @@ const SignInSchema = z.object({
 type SignUpValues = z.infer<typeof SignUpSchema>;
 type SignInValues = z.infer<typeof SignInSchema>;
 
-export function EmailAuthForm() {
+interface EmailAuthFormProps {
+  onLoginSuccess?: () => void;
+}
+
+export function EmailAuthForm({ onLoginSuccess }: EmailAuthFormProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const router = useRouter();
 
   const form = useForm<SignUpValues | SignInValues>({
     resolver: zodResolver(isSignUp ? SignUpSchema : SignInSchema),
@@ -63,7 +66,7 @@ export function EmailAuthForm() {
         await signInWithEmailAndPassword(auth, email, password);
         toast({ title: 'Signed In', description: "Welcome back!" });
       }
-      router.push('/');
+      onLoginSuccess?.();
     } catch (error) {
       const authError = error as AuthError;
       let errorMessage = 'An unexpected error occurred. Please try again.';
@@ -131,7 +134,7 @@ export function EmailAuthForm() {
           </div>
           <Button disabled={isLoading} className="w-full">
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSignUp ? 'Create Account' : 'Sign In'}
+            {isSignUp ? 'Create Account' : 'Sign In with Email'}
           </Button>
         </div>
       </form>
