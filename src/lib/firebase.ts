@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { subscribeToTopic } from "@/app/announcements/actions";
@@ -17,6 +17,20 @@ const app = firebaseConfig.projectId && !getApps().length ? initializeApp(fireba
 const db = app ? getFirestore(app) : null;
 const auth = app ? getAuth(app) : null;
 const messaging = app && typeof window !== 'undefined' ? getMessaging(app) : null;
+
+if (db) {
+  enableIndexedDbPersistence(db)
+    .catch((err) => {
+      if (err.code == 'failed-precondition') {
+        // Multiple tabs open, persistence can only be enabled in one.
+        console.warn('Firestore persistence failed: multiple tabs open.');
+      } else if (err.code == 'unimplemented') {
+        // The current browser does not support all of the
+        // features required to enable persistence
+        console.warn('Firestore persistence not available in this browser.');
+      }
+    });
+}
 
 export const requestNotificationPermission = async () => {
   if (!messaging || !auth) {
