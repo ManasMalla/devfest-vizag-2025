@@ -7,10 +7,10 @@ import { Footer } from '@/components/footer';
 import { Toaster } from "@/components/ui/toaster"
 import { NotificationPermissionHandler } from '@/components/notification-permission-handler';
 
-const APP_NAME = "DevFest Vizag 2025 Hub";
-const APP_DEFAULT_TITLE = "DevFest Vizag 2025 Hub";
+const APP_NAME = "DevFest Vizag 2025";
+const APP_DEFAULT_TITLE = "DevFest Vizag 2025";
 const APP_TITLE_TEMPLATE = "%s - DevFest Vizag 2025";
-const APP_DESCRIPTION = "The official hub for DevFest Vizag 2025.";
+const APP_DESCRIPTION = "The official website for DevFest Vizag 2025.";
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,
