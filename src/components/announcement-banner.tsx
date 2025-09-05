@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -52,15 +53,15 @@ export function AnnouncementBanner() {
   }
 
   return (
-    <div className="relative w-full bg-primary/10 text-primary-foreground">
-      <div className="container mx-auto flex items-center justify-center gap-4 px-4 py-3 text-sm">
+    <div className="w-full bg-primary/10 text-primary-foreground">
+      <div className="container mx-auto grid grid-cols-[auto,1fr,auto] items-center gap-4 px-4 py-3 text-sm">
         <Megaphone className="h-5 w-5 flex-shrink-0 text-primary" />
-        <div className="text-foreground text-center">
+        <div className="text-center text-foreground">
             <MarkdownPreview content={latestAnnouncement.content} />
         </div>
         <button
           onClick={handleDismiss}
-          className="absolute right-4 top-1/2 -translate-y-1/2 rounded-md p-1 text-foreground/70 hover:bg-primary/20 hover:text-foreground"
+          className="rounded-md p-1 text-foreground/70 hover:bg-primary/20 hover:text-foreground"
           aria-label="Dismiss announcement"
         >
           <X className="h-4 w-4" />
