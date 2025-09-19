@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Gallery } from "@/components/gallery";
-import { Instagram, Users, Calendar, MapPin } from "lucide-react";
+import { Instagram, Users, Calendar, MapPin, Ticket, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
@@ -53,7 +53,21 @@ export default function Home() {
             </div>
         </div>
 
-        <div className="mt-8 flex flex-col items-center gap-4">
+        <div className="mt-8 flex flex-col items-center gap-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button asChild size="lg">
+              <Link href="#tickets">
+                <Ticket />
+                Get Tickets
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="secondary">
+                <Link href="/agenda">
+                    <BookOpen />
+                    View Agenda
+                </Link>
+            </Button>
+          </div>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button asChild variant="outline">
               <Link href={config.socials.instagram} target="_blank" rel="noopener noreferrer">
@@ -71,7 +85,7 @@ export default function Home() {
         </div>
       </div>
       
-      <div className="w-full max-w-4xl mx-auto py-12 px-4">
+      <div id="tickets" className="w-full max-w-4xl mx-auto py-12 px-4 scroll-mt-20">
         <Card className="overflow-hidden">
           <CardHeader>
             <CardTitle className="text-2xl md:text-3xl text-center">Get Your Tickets</CardTitle>
