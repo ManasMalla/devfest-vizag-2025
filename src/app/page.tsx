@@ -12,6 +12,23 @@ import { PastSponsors } from "@/components/past-sponsors";
 import { AnnouncementBanner } from "@/components/announcement-banner";
 import { DevFestLogo } from "@/components/logo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+
+const timelines = [
+  { event: "Early Bird Registration", date: "Starts on 20th September, ends on 30th September (or until tickets last)" },
+  { event: "Skill Pass Applications", date: "Closes on 30th September" },
+  { event: "Skill Pass Ticket Rollout", date: "By 5th October" },
+  { event: "General Entry Ticket", date: "Available from 1st October" },
+  { event: "Final Agenda & Speaker List Release", date: "Before 1st October" },
+];
+
 
 export default function Home() {
   const [user, loading] = auth ? useAuthState(auth) : [null, true];
@@ -99,6 +116,34 @@ export default function Home() {
               height="500"
               className="border-none"
             ></iframe>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div id="timelines" className="w-full max-w-4xl mx-auto py-12 px-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl md:text-3xl text-center">Tentative Timelines</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-lg border">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                        <TableHead>Event</TableHead>
+                        <TableHead>Date / Deadline</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {timelines.map((item) => (
+                        <TableRow key={item.event}>
+                            <TableCell className="font-medium">{item.event}</TableCell>
+                            <TableCell>{item.date}</TableCell>
+                        </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
