@@ -120,7 +120,7 @@ export default function Home() {
       
       <StatsSection />
 
-      <div id="tickets" className="w-full max-w-4xl mx-auto py-12 px-4 scroll-mt-20">
+      <div id="tickets" className="w-full max-w-6xl mx-auto py-12 px-4 scroll-mt-20">
         <Card className="overflow-hidden">
           <CardHeader>
             <div className="text-center">
