@@ -11,7 +11,7 @@ import config from '@/config.json';
 import { Sponsors } from "@/components/sponsors";
 import { AnnouncementBanner } from "@/components/announcement-banner";
 import { DevFestLogo } from "@/components/logo";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -121,7 +121,14 @@ export default function Home() {
       <div id="tickets" className="w-full max-w-4xl mx-auto py-12 px-4 scroll-mt-20">
         <Card className="overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-2xl md:text-3xl text-center">Get Your Tickets</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-2xl md:text-3xl">Get Your Tickets</CardTitle>
+              <Button asChild variant="link">
+                <Link href="https://konfhub.com/devfest-vizag-2025" target="_blank" rel="noopener noreferrer">
+                  Open in new tab <ArrowUpRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <iframe 
@@ -133,13 +140,6 @@ export default function Home() {
               className="border-none"
             ></iframe>
           </CardContent>
-          <CardFooter className="justify-end">
-            <Button asChild variant="link">
-              <Link href="https://konfhub.com/devfest-vizag-2025" target="_blank" rel="noopener noreferrer">
-                Open in new tab <ArrowUpRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardFooter>
         </Card>
       </div>
 
