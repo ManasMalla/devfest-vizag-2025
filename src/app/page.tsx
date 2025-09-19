@@ -25,9 +25,9 @@ import {
 const timelines = [
   { event: "Early Bird Registration", date: "20th September - 30th September" },
   { event: "Skill Pass Applications Close", date: "30th September" },
-  { event: "Skill Pass Ticket Rollout", date: "By 5th October" },
-  { event: "General Entry Tickets", date: "From 1st October" },
-  { event: "Final Agenda & Speaker List Release", date: "By 1st October" },
+  { event: "Skill Pass Ticket Rollout", date: "5th October" },
+  { event: "General Entry Tickets", date: "1st October - 31st October" },
+  { event: "Final Agenda & Speaker List Release", date: "1st October" },
 ];
 
 
