@@ -39,7 +39,7 @@ export function WorkshopsSection() {
                         width={64}
                         height={64}
                         data-ai-hint={workshop.aiHint}
-                        className="object-contain"
+                        className="object-contain bg-transparent rounded-full"
                     />
                 </div>
                 <CardTitle>{workshop.title}</CardTitle>
