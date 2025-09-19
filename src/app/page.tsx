@@ -11,6 +11,7 @@ import config from '@/config.json';
 import { PastSponsors } from "@/components/past-sponsors";
 import { AnnouncementBanner } from "@/components/announcement-banner";
 import { DevFestLogo } from "@/components/logo";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
   const [user, loading] = auth ? useAuthState(auth) : [null, true];
@@ -53,9 +54,6 @@ export default function Home() {
         </div>
 
         <div className="mt-8 flex flex-col items-center gap-4">
-          <Button size="lg" disabled>
-            Tickets Opening Soon
-          </Button>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button asChild variant="outline">
               <Link href={config.socials.instagram} target="_blank" rel="noopener noreferrer">
@@ -73,6 +71,24 @@ export default function Home() {
         </div>
       </div>
       
+      <div className="w-full max-w-4xl mx-auto py-12 px-4">
+        <Card className="overflow-hidden">
+          <CardHeader>
+            <CardTitle className="text-2xl md:text-3xl text-center">Get Your Tickets</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <iframe 
+              src="https://konfhub.com/widget/devfest-vizag-2025?desc=true&secondaryBg=F7F7F7&ticketBg=F7F7F7&borderCl=F7F7F7&bg=FFFFFF&fontColor=1e1f24&ticketCl=1e1f24&btnColor=002E6E&fontFamily=Nunito&borderRadius=12&widget_type=standard&tickets=56817&ticketId=56817%7C1" 
+              id="konfhub-widget" 
+              title="Register for DevFest Vizag 2025" 
+              width="100%" 
+              height="500"
+              className="border-none"
+            ></iframe>
+          </CardContent>
+        </Card>
+      </div>
+
       <Gallery />
       <PastSponsors />
     </div>
