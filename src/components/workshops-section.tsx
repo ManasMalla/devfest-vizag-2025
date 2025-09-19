@@ -12,7 +12,7 @@ const workshops = [
   {
     image: "/images/google-cloud.png",
     title: "Cloud Workshop",
-    description: "Get hands-on experience with the latest cloud technologies. This workshop will cover essential concepts, from serverless architecture to containerization and infrastructure as code, empowering you to build scalable and resilient applications.",
+    description: "This workshop will cover the basics of the Google Cloud Platform. Get hands-on experience with core concepts and services, perfect for beginners looking to start their cloud journey.",
     aiHint: "Google Cloud logo"
   }
 ];
