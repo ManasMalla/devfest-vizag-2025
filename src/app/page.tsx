@@ -124,7 +124,7 @@ export default function Home() {
       <div id="timelines" className="w-full max-w-4xl mx-auto py-12 px-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl md:text-3xl text-center">Tentative Timelines</CardTitle>
+            <CardTitle className="text-2xl md:text-3xl text-center">Event & Ticket Timelines</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="rounded-lg border">
