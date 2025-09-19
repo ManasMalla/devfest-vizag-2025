@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -22,11 +23,11 @@ import {
 } from "@/components/ui/table"
 
 const timelines = [
-  { event: "Early Bird Registration", date: "Starts on 20th September, ends on 30th September (or until tickets last)" },
-  { event: "Skill Pass Applications", date: "Closes on 30th September" },
+  { event: "Early Bird Registration", date: "20th September - 30th September" },
+  { event: "Skill Pass Applications Close", date: "30th September" },
   { event: "Skill Pass Ticket Rollout", date: "By 5th October" },
-  { event: "General Entry Ticket", date: "Available from 1st October" },
-  { event: "Final Agenda & Speaker List Release", date: "Before 1st October" },
+  { event: "General Entry Tickets", date: "From 1st October" },
+  { event: "Final Agenda & Speaker List Release", date: "By 1st October" },
 ];
 
 
@@ -144,6 +145,9 @@ export default function Home() {
                     </TableBody>
                 </Table>
             </div>
+            <p className="text-xs text-muted-foreground mt-4">
+                *All timelines are tentative and subject to ticket availability.
+            </p>
           </CardContent>
         </Card>
       </div>
