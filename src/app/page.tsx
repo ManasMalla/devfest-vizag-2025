@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table"
 import { StatsSection } from "@/components/stats-section";
 import { AgendaPromoSection } from "@/components/agenda-promo-section";
+import { WorkshopsSection } from "@/components/workshops-section";
 
 const timelines = [
   { event: "Early Bird Registration", date: "20th September - 30th September" },
@@ -145,6 +146,8 @@ export default function Home() {
       </div>
 
       <AgendaPromoSection />
+      
+      <WorkshopsSection />
 
       <div id="timelines" className="w-full max-w-4xl mx-auto py-12 px-4">
         <Card>
