@@ -7,16 +7,16 @@ export function Footer() {
   return (
     <footer className="bg-background border-t">
       <div className="container mx-auto py-8 px-4 md:px-6">
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="flex flex-col gap-4">
             <Link href="/" className="flex items-center space-x-2">
-              <GDGVizagLogo className="h-6 w-32" />
+              <GDGVizagLogo className="h-8 w-auto" />
             </Link>
             <p className="text-sm text-muted-foreground max-w-sm">
               The biggest developer conference in Visakhapatnam, brought to you by the community, for the community.
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-8">
             <div className="grid gap-2 content-start">
               <h3 className="text-sm font-semibold">Navigation</h3>
               {config.navigation.home && <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">Home</Link>}
