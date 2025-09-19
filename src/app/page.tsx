@@ -28,6 +28,7 @@ const timelines = [
   { event: "Skill Pass Applications Close", date: "30th September" },
   { event: "Skill Pass Ticket Rollout", date: "5th October" },
   { event: "General Entry Tickets", date: "1st October - 31st October" },
+  { event: "Workshop Agenda Release", date: "1st October" },
   { event: "Final Agenda & Speaker List Release", date: "1st October" },
 ];
 
