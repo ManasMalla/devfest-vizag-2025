@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Instagram, Users, Calendar, MapPin, Ticket, BookOpen } from "lucide-react";
+import { Instagram, Users, Calendar, MapPin, Ticket, BookOpen, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -11,7 +11,7 @@ import config from '@/config.json';
 import { Sponsors } from "@/components/sponsors";
 import { AnnouncementBanner } from "@/components/announcement-banner";
 import { DevFestLogo } from "@/components/logo";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -133,6 +133,13 @@ export default function Home() {
               className="border-none"
             ></iframe>
           </CardContent>
+          <CardFooter className="justify-end">
+            <Button asChild variant="link">
+              <Link href="https://konfhub.com/devfest-vizag-2025" target="_blank" rel="noopener noreferrer">
+                Open in new tab <ArrowUpRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardFooter>
         </Card>
       </div>
 
