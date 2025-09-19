@@ -22,8 +22,8 @@ const stats = [
   },
   {
     icon: Rocket,
-    value: "1",
-    label: "Expert Track",
+    value: "4",
+    label: "Expert Track sessions",
     color: "text-[#0F9D58]", // Google Green
   },
 ];
