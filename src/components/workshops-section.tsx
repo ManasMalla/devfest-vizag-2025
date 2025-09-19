@@ -1,17 +1,19 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit, Cloud } from "lucide-react";
+import Image from "next/image";
 
 const workshops = [
   {
-    icon: BrainCircuit,
+    image: "/images/gemini.png",
     title: "Agentic AI Workshop",
     description: "Dive into the world of autonomous AI agents. Learn how to build, deploy, and manage intelligent agents that can reason, plan, and execute complex tasks. This hands-on workshop is perfect for developers looking to explore the cutting edge of artificial intelligence.",
+    aiHint: "Gemini AI logo"
   },
   {
-    icon: Cloud,
+    image: "/images/google-cloud.png",
     title: "Cloud Workshop",
     description: "Get hands-on experience with the latest cloud technologies. This workshop will cover essential concepts, from serverless architecture to containerization and infrastructure as code, empowering you to build scalable and resilient applications.",
+    aiHint: "Google Cloud logo"
   }
 ];
 
@@ -28,17 +30,24 @@ export function WorkshopsSection() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {workshops.map((workshop) => (
-          <Card key={workshop.title} className="flex flex-col">
-            <CardHeader className="flex-row items-center gap-4">
-                <workshop.icon className="h-10 w-10 text-primary flex-shrink-0" />
-                <div>
-                    <CardTitle>{workshop.title}</CardTitle>
+          <Card key={workshop.title} className="flex flex-col text-center">
+            <CardHeader className="items-center">
+                <div className="bg-white rounded-full p-2 mb-4">
+                    <Image
+                        src={workshop.image}
+                        alt={`${workshop.title} logo`}
+                        width={64}
+                        height={64}
+                        data-ai-hint={workshop.aiHint}
+                        className="object-contain"
+                    />
                 </div>
+                <CardTitle>{workshop.title}</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow">
               <CardDescription>{workshop.description}</CardDescription>
             </CardContent>
-            <CardFooter className="flex-col items-start gap-2">
+            <CardFooter className="flex-col items-center gap-2">
               <Button variant="outline" disabled>
                 View Agenda (Coming Soon)
               </Button>
