@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { PastSponsors } from "@/components/past-sponsors"
 
 const images = [
   { src: "/images/gallery/IMG_00000.jpg", alt: "Gallery image 0" },
@@ -45,6 +46,7 @@ export default function GalleryPage() {
           </div>
         ))}
       </div>
+      <PastSponsors />
     </div>
   )
 }

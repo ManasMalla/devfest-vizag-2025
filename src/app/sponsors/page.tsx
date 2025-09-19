@@ -1,5 +1,5 @@
 import { GoogleFormEmbed } from "@/components/google-form-embed"
-import { PastSponsors } from "@/components/past-sponsors";
+import { Sponsors } from "@/components/sponsors";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Rocket } from "lucide-react"
 
@@ -25,7 +25,7 @@ export default function SponsorsPage() {
         </AlertDescription>
       </Alert>
 
-      <PastSponsors />
+      <Sponsors />
       
       <GoogleFormEmbed formUrl={formUrl} title="Sponsorship Interest Form" />
     </div>

@@ -8,7 +8,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
 import { Skeleton } from "@/components/ui/skeleton";
 import config from '@/config.json';
-import { PastSponsors } from "@/components/past-sponsors";
+import { Sponsors } from "@/components/sponsors";
 import { AnnouncementBanner } from "@/components/announcement-banner";
 import { DevFestLogo } from "@/components/logo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -169,7 +169,7 @@ export default function Home() {
         </Card>
       </div>
 
-      <PastSponsors />
+      <Sponsors />
     </div>
   );
 }
