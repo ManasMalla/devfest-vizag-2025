@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { StatsSection } from "@/components/stats-section";
 
 const timelines = [
   { event: "Early Bird Registration", date: "20th September - 30th September" },
@@ -116,6 +115,8 @@ export default function Home() {
         </div>
       </div>
       
+      <StatsSection />
+
       <div id="tickets" className="w-full max-w-4xl mx-auto py-12 px-4 scroll-mt-20">
         <Card className="overflow-hidden">
           <CardHeader>
