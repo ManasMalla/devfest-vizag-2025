@@ -2,7 +2,6 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Gallery } from "@/components/gallery";
 import { Instagram, Users, Calendar, MapPin, Ticket, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -152,7 +151,6 @@ export default function Home() {
         </Card>
       </div>
 
-      <Gallery />
       <PastSponsors />
     </div>
   );

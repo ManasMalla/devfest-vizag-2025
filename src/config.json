@@ -2,6 +2,7 @@
   "navigation": {
     "home": true,
     "agenda": true,
+    "gallery": true,
     "volunteer": true,
     "sessions": false,
     "speakers": false,
