@@ -4,19 +4,19 @@ import { Users, Presentation, Mic, Rocket } from "lucide-react";
 const stats = [
   {
     icon: Users,
-    value: "700+",
+    value: "700",
     label: "Attendees",
     color: "text-[#4285F4]", // Google Blue
   },
   {
     icon: Presentation,
-    value: "2+",
+    value: "2",
     label: "Workshops",
     color: "text-[#DB4437]", // Google Red
   },
   {
     icon: Mic,
-    value: "12+",
+    value: "12",
     label: "Speakers",
     color: "text-[#F4B400]", // Google Yellow
   },
