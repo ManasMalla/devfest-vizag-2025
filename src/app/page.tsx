@@ -39,14 +39,16 @@ export default function Home() {
           Join us for the largest developer conference in Visakhapatnam, featuring expert speakers, hands-on workshops, and networking opportunities with the best in tech.
         </p>
         
-        <div className="mt-8 flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-muted-foreground">
+        <div className="mt-8 flex flex-wrap justify-center items-center gap-x-6 gap-y-4 text-muted-foreground">
             <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                <span>Date: TBD</span>
+                <span>1st November 2025</span>
             </div>
             <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                <span>Venue: TBD</span>
+                <Link href="https://share.google/0QmY64oA3sLoM9VMx" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                    GITAM University, Visakhapatnam
+                </Link>
             </div>
         </div>
 
