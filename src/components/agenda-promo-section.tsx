@@ -1,4 +1,6 @@
+
 import Image from "next/image";
+import Link from "next/link";
 
 const images = [
   { src: "/images/gallery/IMG_00000.jpg", alt: "DevFest Vizag 2024 audience", "data-ai-hint": "conference audience" },
@@ -12,10 +14,12 @@ export function AgendaPromoSection() {
     <section className="w-full max-w-4xl mx-auto py-12 px-4">
        <div className="text-center mb-8">
         <p className="text-lg text-muted-foreground">
-          Be a part of the agentic and cloud revolution. Explore the agenda to know more.
+          Be a part of the agentic and cloud revolution. Explore the{' '}
+          <Link href="/agenda" className="text-primary hover:underline">agenda</Link> 
+          {' '}to know more.
         </p>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
         {images.map((image, index) => (
           <div key={index} className="overflow-hidden rounded-lg shadow-lg group aspect-video">
             <Image
