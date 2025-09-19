@@ -121,7 +121,7 @@ export default function Home() {
       <div id="tickets" className="w-full max-w-4xl mx-auto py-12 px-4 scroll-mt-20">
         <Card className="overflow-hidden">
           <CardHeader>
-            <div>
+            <div className="text-center">
               <CardTitle className="text-2xl md:text-3xl">Get Your Tickets</CardTitle>
               <Button asChild variant="link" className="px-0 h-auto py-1">
                 <Link href="https://konfhub.com/devfest-vizag-2025" target="_blank" rel="noopener noreferrer">
