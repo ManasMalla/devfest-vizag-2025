@@ -8,24 +8,13 @@ export function Footer() {
     <footer className="bg-background border-t">
       <div className="container mx-auto py-8 px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-1 flex flex-col gap-4">
-            <Link href="/" className="flex items-center space-x-2">
-              <GDGVizagLogo className="h-8 w-auto" />
-            </Link>
-            <p className="text-sm text-muted-foreground max-w-sm">
-              The biggest developer conference in Visakhapatnam, brought to you by the community, for the community.
-            </p>
-          </div>
-          <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2 grid grid-cols-3 md:grid-cols-3 gap-8">
+            <GDGVizagLogo className="h-32 w-auto" />
             <div className="grid gap-2 content-start">
               <h3 className="text-sm font-semibold">Navigation</h3>
               {config.navigation.home && <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">Home</Link>}
-              {config.navigation.speakers && <Link href="/speakers" className="text-sm text-muted-foreground hover:text-foreground">Speakers</Link>}
-              {config.navigation.sessions && <Link href="/sessions" className="text-sm text-muted-foreground hover:text-foreground">Sessions</Link>}
-              {config.navigation.sponsors && <Link href="/sponsors" className="text-sm text-muted-foreground hover:text-foreground">Sponsors</Link>}
-            </div>
-            <div className="grid gap-2 content-start">
-              <h3 className="text-sm font-semibold">Community</h3>
+              {config.navigation.agenda && <Link href="/agenda" className="text-sm text-muted-foreground hover:text-foreground">Agenda</Link>}
+              {config.navigation.gallery && <Link href="/gallery" className="text-sm text-muted-foreground hover:text-foreground">Gallery</Link>}
               {config.navigation.volunteer && <Link href="/volunteer" className="text-sm text-muted-foreground hover:text-foreground">Volunteer</Link>}
               {config.navigation.codeOfConduct && <Link href="/code-of-conduct" className="text-sm text-muted-foreground hover:text-foreground">Code of Conduct</Link>}
             </div>
