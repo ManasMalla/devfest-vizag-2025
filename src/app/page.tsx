@@ -75,12 +75,12 @@ export default function Home() {
           <div className="mt-8 flex flex-wrap justify-center items-center gap-x-6 gap-y-4 text-muted-foreground">
               <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span>1st November 2025</span>
+                  <span><p>1st November 2025</p></span>
               </div>
               <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   <Link href="https://share.google/0QmY64oA3sLoM9VMx" target="_blank" rel="noopener noreferrer" className="hover:underline">
-                      GITAM University, Visakhapatnam
+                      <p>GITAM University, Visakhapatnam</p>
                   </Link>
               </div>
           </div>
@@ -90,13 +90,13 @@ export default function Home() {
               <Button asChild size="lg">
                 <Link href="#tickets">
                   <Ticket />
-                  Get Tickets
+                  <p>Get Tickets</p>
                 </Link>
               </Button>
               <Button asChild size="lg" variant="secondary">
                   <Link href="/agenda">
                       <BookOpen />
-                      View Agenda
+                      <p>View Agenda</p>
                   </Link>
               </Button>
             </div>
@@ -104,13 +104,13 @@ export default function Home() {
               <Button asChild variant="outline">
                 <Link href={config.socials.instagram} target="_blank" rel="noopener noreferrer">
                   <Instagram />
-                  Follow on Instagram
+                  <p>Follow on Instagram</p>
                 </Link>
               </Button>
               <Button asChild variant="outline">
                 <Link href={config.socials.community} target="_blank" rel="noopener noreferrer">
                   <Users />
-                  Join Community
+                  <p>Join Community</p>
                 </Link>
               </Button>
             </div>
