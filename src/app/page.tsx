@@ -80,7 +80,7 @@ export default function Home() {
               <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   <Link href="https://share.google/0QmY64oA3sLoM9VMx" target="_blank" rel="noopener noreferrer" className="hover:underline">
-                      <p>GITAM University, Visakhapatnam</p>
+                      GITAM University, Visakhapatnam
                   </Link>
               </div>
           </div>
