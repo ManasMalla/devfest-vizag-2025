@@ -45,8 +45,8 @@ const CardTitle = React.forwardRef<
 CardTitle.displayName = "CardTitle"
 
 const CardDescription = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
