@@ -75,7 +75,7 @@ export default function Home() {
           <div className="mt-8 flex flex-wrap justify-center items-center gap-x-6 gap-y-4 text-muted-foreground">
               <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span><p>1st November 2025</p></span>
+                  <p>1st November 2025</p>
               </div>
               <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
